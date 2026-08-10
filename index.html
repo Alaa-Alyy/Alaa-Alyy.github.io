@@ -1,0 +1,663 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alaa Ali — Data Engineer</title>
+  <meta name="description"
+    content="Alaa Ali — Data Engineer from Cairo who builds the pipelines behind smart decisions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@1,700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       INTRO CINEMATIC OVERLAY
+  ════════════════════════════════════════════════ -->
+  <div id="intro-overlay">
+    <canvas id="introCanvas"></canvas>
+
+    <!-- Astronaut -->
+    <div id="astro-wrap">
+      <div id="astronaut">
+        <span class="astro-body">🧑‍🚀</span>
+        <div class="astro-glow"></div>
+        <div class="astro-trail"></div>
+      </div>
+
+      <!-- Speech Bubble -->
+      <div id="speech-bubble">
+        <div class="bubble-arrow"></div>
+        <p class="bubble-line pre">pssst...</p>
+        <p class="bubble-big">you need a<br /><span class="bubble-highlight">Data Engineer?</span></p>
+        <p class="bubble-line post">she's right here ✦</p>
+      </div>
+    </div>
+
+    <div id="intro-skip">click anywhere to skip</div>
+  </div>
+  <!-- END INTRO -->
+
+  <!-- ═══ GAME UI ELEMENTS (always on top) ═══ -->
+
+  <!-- Player HUD (appears on scroll) -->
+  <div id="player-hud">
+    <div class="hud-name">ALAA · ALI</div>
+    <div class="hud-level">&#9654; LVL 4 &middot; DATA ENGINEER</div>
+    <div class="hud-hp"><div class="hud-hp-fill"></div></div>
+  </div>
+
+  <!-- Achievement toast (fires once on load) -->
+  <div id="achievement-toast">
+    <div class="ach-icon">🏆</div>
+    <div class="ach-text">
+      <div class="ach-label">achievement unlocked</div>
+      <div class="ach-title">Entered the Portfolio ✦</div>
+      <div class="ach-bar"><div class="ach-bar-fill" id="achBarFill"></div></div>
+    </div>
+  </div>
+
+  <!-- NAV — lives OUTSIDE site-wrapper so position:fixed always works -->
+  <nav id="navbar" class="nav-intro-hidden">
+    <div class="nav-inner">
+      <span class="nav-logo">AA<span class="dot">.</span></span>
+      <!-- Photo shrinks here on scroll -->
+      <div class="nav-photo-slot">
+        <div class="nav-photo" id="navPhoto">
+          <img src="photo.jpg" alt="Alaa Ali" onerror="this.parentElement.classList.add('no-photo')" />
+          <span class="photo-initials">AA</span>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#stack">Stack</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#competitions">Activities</a></li>
+        <li><a href="#certs">Certs</a></li>
+        <li><a href="#contact" class="nav-cta">Say hi ✦</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="menu">&#9776;</button>
+    </div>
+    <ul class="mobile-menu" id="mobileMenu">
+      <li><a href="#about">About</a></li>
+      <li><a href="#stack">Stack</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#certs">Certs</a></li>
+      <li><a href="#contact">Say hi</a></li>
+    </ul>
+  </nav>
+
+  <!-- SITE (starts zoomed-out, zooms in after intro) -->
+  <div id="site-wrapper">
+
+    <!-- HERO -->
+    <section id="hero">
+      <canvas id="heroCanvas"></canvas>
+      <div class="nebula1"></div>
+      <div class="nebula2"></div>
+
+      <!-- Big photo in hero -->
+      <div class="hero-inner">
+
+        <!-- PHOTO: 1/4 -->
+        <div class="hero-photo-wrap" id="heroPhotoWrap">
+          <div class="hero-photo-ring">
+            <img src="photo.jpg" alt="Alaa Ali" id="heroPhotoImg"
+              onerror="this.parentElement.classList.add('no-photo')" />
+            <span class="hero-photo-initials">AA</span>
+          </div>
+          <div class="photo-orbit"></div>
+        </div>
+
+        <!-- TEXT: 3/4 -->
+        <div class="hero-content">
+          <p class="hero-eyebrow">✦ she codes ✦</p>
+          <div class="sparkle-row">✧ ⋆ ✦ ⋆ ✧</div>
+          <h1 class="hero-name">
+            <span class="hero-name-line1">Alaa Ali</span>
+            <span class="hero-name-line2">Abdulaleem</span>
+          </h1>
+          <p class="hero-role">Data Engineer · <span>Big Data</span> · ML</p>
+          <div class="hero-badges">
+            <span class="hbadge pink">✦ pipelines that don't break</span>
+            <span class="hbadge violet">⋆ models that actually work</span>
+            <span class="hbadge rose">✧ Cairo → anywhere</span>
+          </div>
+          <p class="hero-sub">I make messy data make sense.<br />The backend of every smart decision? That's where I
+            live.</p>
+          <div class="hero-stats">
+            <div class="stat"><span class="stat-num">1M+</span><span class="stat-label">rows processed</span></div>
+            <div class="stat-div"></div>
+            <div class="stat"><span class="stat-num">20%</span><span class="stat-label">latency cut</span></div>
+            <div class="stat-div"></div>
+            <div class="stat"><span class="stat-num">94%</span><span class="stat-label">model accuracy</span></div>
+            <div class="stat-div"></div>
+            <div class="stat"><span class="stat-num">30%</span><span class="stat-label">setup time saved</span></div>
+          </div>
+          <div class="hero-ctas">
+            <a href="#projects" class="btn-primary">see what I built</a>
+            <a href="#contact" class="btn-outline">let's talk</a>
+          </div>
+          <div class="hero-socials">
+            <a href="https://github.com/Alaa-Alyy" target="_blank" class="social-link">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              GitHub
+            </a>
+            <a href="https://www.linkedin.com/in/alaa-ali-software-engineer/" target="_blank" class="social-link">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+              </svg>
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+      </div>
+      <div class="hero-scroll"><span>scroll</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section">
+      <div class="container">
+        <div class="section-label">who am i</div>
+        <div class="about-grid">
+          <div class="about-text reveal">
+            <h2>I didn't choose data —<br /><span class="gradient-text italic-text">it chose me.</span></h2>
+            <p>Started in UI/UX, got obsessed with what was happening in the backend. Turns out I liked the invisible
+              layer the pipelines, the models, the systems nobody sees but everyone depends on.</p>
+            <p>DEPI trained me to be rigorous. CIB showed me what data looks like at scale inside a bank. I'm still a
+              student and somehow already running pipelines through 1M+ rows. I work fast, break things cleanly, and fix
+              them even faster.</p>
+            <div class="about-tags">
+              <span class="tag">📍 Cairo, Egypt</span>
+              <span class="tag">✈️ will relocate, no hesitation</span>
+              <span class="tag">🎓 CS @ Helwan National University</span>
+              <span class="tag">🗣️ Arabic native · English C1</span>
+            </div>
+          </div>
+          <div class="about-card reveal">
+            <!-- Pipeline: dots + labels, no boxes -->
+            <div class="pipeline-visual">
+              <div class="pipe-step">
+                <div class="pipe-dot"></div>
+                <span class="pipe-label">Ingest</span>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-step">
+                <div class="pipe-dot"></div>
+                <span class="pipe-label">Transform</span>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-step">
+                <div class="pipe-dot active"></div>
+                <span class="pipe-label">Load</span>
+              </div>
+              <div class="pipe-line"></div>
+              <div class="pipe-step">
+                <div class="pipe-dot accent"></div>
+                <span class="pipe-label">Analyze</span>
+              </div>
+            </div>
+
+            <!-- Metrics: floating numbers, no cards -->
+            <div class="about-metrics">
+              <div class="metric-item">
+                <span class="metric-val">4+</span>
+                <span class="metric-desc">apps shipped in Docker</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-val">5+</span>
+                <span class="metric-desc">people I've led</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-val">20+</span>
+                <span class="metric-desc">bugs I killed</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-val">2×</span>
+                <span class="metric-desc">ECPC — competed</span>
+              </div>
+            </div>
+
+            <!-- XP Skill bars — game stat sheet -->
+            <div class="xp-bars">
+              <div class="xp-row">
+                <div class="xp-label"><span>Python</span><span>92 XP</span></div>
+                <div class="xp-track"><div class="xp-fill" data-xp="92"></div></div>
+              </div>
+              <div class="xp-row">
+                <div class="xp-label"><span>Apache Spark</span><span>85 XP</span></div>
+                <div class="xp-track"><div class="xp-fill" data-xp="85"></div></div>
+              </div>
+              <div class="xp-row">
+                <div class="xp-label"><span>SQL & Data Modelling</span><span>88 XP</span></div>
+                <div class="xp-track"><div class="xp-fill" data-xp="88"></div></div>
+              </div>
+              <div class="xp-row">
+                <div class="xp-label"><span>Machine Learning</span><span>78 XP</span></div>
+                <div class="xp-track"><div class="xp-fill" data-xp="78"></div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section id="stack" class="section section-alt">
+      <div class="container">
+        <div class="section-label">what's in my terminal</div>
+        <h2 class="section-title reveal">The tools I actually use ✦</h2>
+        <div class="stack-groups">
+
+          <!-- Programming Languages -->
+          <div class="stack-group reveal" style="--group-color:var(--pink)">
+            <div class="stack-group-bg"></div>
+            <h3 class="group-title"><span class="group-icon">&#9000;</span> Programming Languages</h3>
+            <div class="stack-chips">
+              <div class="chip chip-float" style="--d:0s">C</div>
+              <div class="chip chip-float" style="--d:.06s">C++</div>
+              <div class="chip chip-float" style="--d:.12s">Python</div>
+              <div class="chip chip-float" style="--d:.18s">Java</div>
+              <div class="chip chip-float" style="--d:.24s">JavaScript</div>
+              <div class="chip chip-float" style="--d:.3s">SQL</div>
+            </div>
+          </div>
+
+          <!-- ML & AI -->
+          <div class="stack-group reveal" style="--group-color:var(--violet)">
+            <div class="stack-group-bg"></div>
+            <h3 class="group-title"><span class="group-icon">&#129504;</span> Machine Learning &amp; AI</h3>
+            <div class="stack-chips">
+              <div class="chip chip-purple chip-float" style="--d:0s">TensorFlow</div>
+              <div class="chip chip-purple chip-float" style="--d:.07s">Keras</div>
+              <div class="chip chip-purple chip-float" style="--d:.14s">Scikit-Learn</div>
+              <div class="chip chip-purple chip-float" style="--d:.21s">Generative AI Principles</div>
+              <div class="chip chip-purple chip-float" style="--d:.28s">Data Governance</div>
+            </div>
+          </div>
+
+          <!-- Data & Big Data Tools -->
+          <div class="stack-group reveal" style="--group-color:var(--rose)">
+            <div class="stack-group-bg"></div>
+            <h3 class="group-title"><span class="group-icon">&#128257;</span> Data &amp; Big Data Tools</h3>
+            <div class="stack-chips">
+              <div class="chip chip-rose chip-float" style="--d:0s">Apache Spark</div>
+              <div class="chip chip-rose chip-float" style="--d:.06s">Apache Airflow</div>
+              <div class="chip chip-rose chip-float" style="--d:.12s">Apache Kafka</div>
+              <div class="chip chip-rose chip-float" style="--d:.18s">Databricks</div>
+              <div class="chip chip-rose chip-float" style="--d:.24s">Snowflake</div>
+              <div class="chip chip-rose chip-float" style="--d:.3s">ETL / ELT</div>
+              <div class="chip chip-rose chip-float" style="--d:.36s">Data Lake</div>
+              <div class="chip chip-rose chip-float" style="--d:.42s">Pandas</div>
+              <div class="chip chip-rose chip-float" style="--d:.48s">NumPy</div>
+            </div>
+          </div>
+
+          <!-- DevOps & Tools -->
+          <div class="stack-group reveal" style="--group-color:var(--gold)">
+            <div class="stack-group-bg"></div>
+            <h3 class="group-title"><span class="group-icon">&#128295;</span> DevOps &amp; Tools</h3>
+            <div class="stack-chips">
+              <div class="chip chip-gold chip-float" style="--d:0s">AWS (S3)</div>
+              <div class="chip chip-gold chip-float" style="--d:.08s">Docker</div>
+              <div class="chip chip-gold chip-float" style="--d:.16s">Git</div>
+              <div class="chip chip-gold chip-float" style="--d:.24s">GitHub</div>
+              <div class="chip chip-gold chip-float" style="--d:.32s">CI/CD Fundamentals</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section id="experience" class="section">
+      <div class="container">
+        <div class="section-label">where I've been</div>
+        <h2 class="section-title reveal">The story so far ⋆</h2>
+        <div class="timeline">
+
+          <div class="tl-item reveal">
+            <div class="tl-dot"></div>
+            <div class="tl-date">Jul 2026 – Aug 2026</div>
+            <div class="tl-card">
+              <div class="tl-header">
+                <div>
+                  <h3>GenAI & Digital Banking Intern</h3>
+                  <span class="tl-company">CIB Egypt</span>
+                </div>
+                <span class="tl-badge">Internship</span>
+              </div>
+              <ul class="tl-bullets">
+                <li>Got a seat at the table where AI meets banking — evaluated real GenAI deployments inside one of
+                  Egypt's biggest banks.</li>
+                <li>Dug into governance, model performance, and data security in contexts where the stakes are actually
+                  high.</li>
+                <li>Studied modern financial systems, automated workflows, and how FinTech actually runs at scale.</li>
+              </ul>
+              <div class="tl-tags">
+                <span>Generative AI</span><span>FinTech</span><span>Data Governance</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-item reveal">
+            <div class="tl-dot"></div>
+            <div class="tl-date">Dec 2025 – Jun 2026</div>
+            <div class="tl-card">
+              <div class="tl-header">
+                <div>
+                  <h3>Data Engineering Trainee</h3>
+                  <span class="tl-company">DEPI — Digital Egypt Pioneers Initiative</span>
+                </div>
+                <span class="tl-badge highlight">✦ Main Arc</span>
+              </div>
+              <ul class="tl-bullets">
+                <li>Built ETL pipelines from scratch with Python & Airflow automated, end-to-end, no babysitting.
+                  <strong>Cut manual processing time by 20%.</strong></li>
+                <li>Wrote SQL that actually performs data models and warehousing solutions that didn't choke on big
+                  datasets.</li>
+                <li>Threw Spark at <strong>1M+ rows</strong> of structured and unstructured data. It handled it.</li>
+                <li>Dockerized 4+ apps and kept the team sane with clean GitHub workflows <strong>30% less "works on my
+                    machine" moments.</strong></li>
+              </ul>
+              <div class="tl-tags">
+                <span>Python</span><span>Apache Spark</span><span>Airflow</span><span>Docker</span><span>SQL</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-item reveal">
+            <div class="tl-dot"></div>
+            <div class="tl-date">Feb 2023 – Mar 2024</div>
+            <div class="tl-card">
+              <div class="tl-header">
+                <div>
+                  <h3>UI/UX Designer</h3>
+                  <span class="tl-company">Alam Community</span>
+                </div>
+                <span class="tl-badge">Design Era</span>
+              </div>
+              <ul class="tl-bullets">
+                <li>Led 5+ people across design, dev, and content kept the vision clear, kept the chaos manageable.</li>
+                <li>Designed interfaces that loaded faster and felt lighter <strong>dashboard load time dropped
+                    15%.</strong></li>
+                <li>Caught 20+ integration bugs during testing. The kind that only show up when real users click things
+                  no one expected.</li>
+              </ul>
+              <div class="tl-tags">
+                <span>UI/UX</span><span>Team Lead</span><span>API Integration</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="section section-alt">
+      <div class="container">
+        <div class="section-label">things I actually built</div>
+        <h2 class="section-title reveal">Projects ✧</h2>
+        <div class="projects-grid">
+
+          <div class="project-card reveal">
+            <div class="project-header">
+              <div class="project-icon">🤖</div>
+              <div class="project-links">
+                <a href="https://github.com/Alaa-Alyy" target="_blank" class="proj-link">GitHub →</a>
+              </div>
+            </div>
+            <h3>ML — Clustering & Classification</h3>
+            <p>Took messy, complex datasets and made them tell a story. EDA → feature engineering → models that hit 90%+
+              F1 then packaged the whole thing into a reproducible pipeline.</p>
+            <div class="project-metrics">
+              <div class="pm"><span class="pm-val">90%+</span><span class="pm-key">F1-Score</span></div>
+              <div class="pm"><span class="pm-val">Auto</span><span class="pm-key">Pipeline</span></div>
+              <div class="pm"><span class="pm-val">EDA</span><span class="pm-key">First</span></div>
+            </div>
+            <ul class="proj-bullets">
+              <li>Deep EDA with Python, Pandas, NumPy no assumptions, just patterns</li>
+              <li>Scikit-Learn classifiers tuned to 90%+ precision, recall, and F1</li>
+              <li>K-means + hierarchical clustering found structure where there wasn't obvious structure</li>
+              <li>Fully automated, reproducible dataset pipeline</li>
+            </ul>
+            <div class="proj-tech">
+              <span>Python</span><span>Scikit-Learn</span><span>Pandas</span><span>NumPy</span>
+            </div>
+          </div>
+
+          <div class="project-card reveal">
+            <div class="project-header">
+              <div class="project-icon">🌿</div>
+              <div class="project-links">
+                <a href="https://github.com/Alaa-Alyy" target="_blank" class="proj-link">GitHub →</a>
+              </div>
+            </div>
+            <h3>Plant Disease Detection</h3>
+            <p>Trained a deep learning model to look at a leaf and know what's wrong with it. 5,000+ images, 94%
+              accuracy, and Grad-CAM so you can actually see why it decided what it decided.</p>
+            <div class="project-metrics">
+              <div class="pm"><span class="pm-val">94%</span><span class="pm-key">Accuracy</span></div>
+              <div class="pm"><span class="pm-val">5K+</span><span class="pm-key">Images</span></div>
+              <div class="pm"><span class="pm-val">XAI</span><span class="pm-key">Grad-CAM</span></div>
+            </div>
+            <ul class="proj-bullets">
+              <li>EfficientNet + ResNet via TensorFlow/Keras picked the architecture that actually fit the problem</li>
+              <li>Built the augmentation pipeline myself no leakage, clean splits</li>
+              <li>94% validation accuracy on a real-world dataset</li>
+              <li>Grad-CAM overlays so it's not a black box anymore</li>
+            </ul>
+            <div class="proj-tech">
+              <span>TensorFlow</span><span>Keras</span><span>EfficientNet</span><span>ResNet</span><span>Grad-CAM</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- EDUCATION -->
+    <section id="education" class="section">
+      <div class="container">
+        <div class="section-label">the basics</div>
+        <h2 class="section-title reveal">Where I'm from, academically</h2>
+        <div class="edu-card reveal">
+          <div class="edu-icon">🎓</div>
+          <div class="edu-info">
+            <h3>Bachelor of Computer Science</h3>
+            <span class="edu-school">Helwan National University — Cairo, Egypt</span>
+            <span class="edu-date">Sep 2023 – Jun 2027</span>
+            <div class="edu-modules">
+              <strong>Studying:</strong>
+              <span class="mod">Data Structures & Algorithms</span>
+              <span class="mod">Database Management Systems</span>
+              <span class="mod">System Analysis & Design</span>
+              <span class="mod">Machine Learning Fundamentals</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- COMPETITIONS & ACTIVITIES -->
+    <section id="competitions" class="section">
+      <div class="container">
+        <div class="section-label">beyond the classroom</div>
+        <h2 class="section-title reveal">Competitions &amp; Activities ✦</h2>
+        <div class="competitions-grid">
+
+          <div class="comp-card reveal comp-accent-violet">
+            <div class="comp-icon">🏆</div>
+            <div class="comp-info">
+              <h3>ECPC — Egyptian Collegiate Programming Contest</h3>
+              <span class="comp-meta">competed twice, came back for more</span>
+              <ul class="comp-bullets">
+                <li>C++, graph theory, data structures — under pressure, on a clock, with a team of 3.</li>
+                <li>Optimized for memory and runtime when it actually mattered. Not in a tutorial. In a contest.</li>
+              </ul>
+              <div class="comp-tags">
+                <span>C++</span><span>Algorithms</span><span>Team Contest</span><span>2× Participant</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="comp-card reveal comp-accent-pink">
+            <div class="comp-icon">🤖</div>
+            <div class="comp-info">
+              <h3>AI Ambassadors Program</h3>
+              <span class="comp-meta">MCIT — Ministry of Communications & IT · Dec 2025</span>
+              <ul class="comp-bullets">
+                <li>Selected as an AI Ambassador representing Egypt's national digital transformation initiative.</li>
+                <li>Spread AI literacy and engaged with real-world applications of ML and Generative AI across communities.</li>
+              </ul>
+              <div class="comp-tags">
+                <span>AI</span><span>Community</span><span>MCIT</span><span>Ambassador</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="comp-card reveal comp-accent-violet">
+            <div class="comp-icon">⚙️</div>
+            <div class="comp-info">
+              <h3>IEEE Robotics & Automation Society</h3>
+              <span class="comp-meta">IEEE RAS Member · Jun 2024</span>
+              <ul class="comp-bullets">
+                <li>Active member of one of the most prestigious engineering societies globally.</li>
+                <li>Participated in workshops, technical sessions, and collaborative engineering projects.</li>
+              </ul>
+              <div class="comp-tags">
+                <span>Robotics</span><span>Automation</span><span>IEEE</span><span>Engineering</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="comp-card reveal comp-accent-rose">
+            <div class="comp-icon">🎨</div>
+            <div class="comp-info">
+              <h3>Design Lead — Alam Community</h3>
+              <span class="comp-meta">UI/UX Designer & Team Lead · Feb 2023 – Mar 2024</span>
+              <ul class="comp-bullets">
+                <li>Led a cross-functional team of 5 — design, dev, and content — and kept the chaos organized.</li>
+                <li>Cut dashboard load time by 15% through smarter interface decisions and caught 20+ integration bugs before they shipped.</li>
+              </ul>
+              <div class="comp-tags">
+                <span>UI/UX</span><span>Team Lead</span><span>Volunteer</span><span>Community</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CERTIFICATIONS -->
+    <section id="certs" class="section section-alt">
+      <div class="container">
+        <div class="section-label">the receipts</div>
+        <h2 class="section-title reveal">Proof of work ✦</h2>
+
+        <!-- Two featured hero certs -->
+        <div class="certs-featured reveal">
+          <div class="cert-feat cert-pink">
+            <div class="cert-feat-glow"></div>
+            <div class="cert-feat-top">
+              <span class="cert-feat-icon">🥇</span>
+              <span class="cert-feat-badge">✦ Top Cert</span>
+            </div>
+            <h3 class="cert-feat-title">AI &amp; Data Science<br/><span>Microsoft Data Engineer</span></h3>
+            <span class="cert-feat-org">DEPI / MCIT</span>
+            <div class="cert-feat-tags"><span>Python</span><span>Spark</span><span>Airflow</span><span>SQL</span></div>
+            <span class="cert-feat-date">Jul 2026</span>
+          </div>
+          <div class="cert-feat cert-violet">
+            <div class="cert-feat-glow"></div>
+            <div class="cert-feat-top">
+              <span class="cert-feat-icon">🏦</span>
+              <span class="cert-feat-badge accent">✦ Internship</span>
+            </div>
+            <h3 class="cert-feat-title">GenAI &amp; Digital Banking<br/><span>Internship Certificate</span></h3>
+            <span class="cert-feat-org">CIB — Commercial International Bank Egypt</span>
+            <div class="cert-feat-tags"><span>Generative AI</span><span>FinTech</span><span>Data Governance</span></div>
+            <span class="cert-feat-date">Aug 2026</span>
+          </div>
+        </div>
+
+        <!-- Constellation grid -->
+        <div class="certs-grid">
+          <div class="cert-card reveal cert-c1"><div class="cert-icon">🤖</div><h4>AI Ambassadors Program</h4><span class="cert-org">MCIT</span><span class="cert-date">Dec 2025</span></div>
+          <div class="cert-card reveal cert-c2"><div class="cert-icon">📊</div><h4>Data Analysis</h4><span class="cert-org">MCIT</span><span class="cert-date">Oct 2025</span></div>
+          <div class="cert-card reveal cert-c3"><div class="cert-icon">🧠</div><h4>Machine Learning</h4><span class="cert-org">IEEE</span><span class="cert-date">Jun 2024</span></div>
+          <div class="cert-card reveal cert-c1"><div class="cert-icon">🎨</div><h4>UI/UX Design</h4><span class="cert-org">180 Pioneers</span><span class="cert-date">Jul 2024</span></div>
+          <div class="cert-card reveal cert-c2"><div class="cert-icon">🌐</div><h4>Front-End Development</h4><span class="cert-org">180 Pioneers</span><span class="cert-date">Feb 2023</span></div>
+          <div class="cert-card reveal cert-c3"><div class="cert-icon">⚙️</div><h4>Robotics &amp; Automation Society</h4><span class="cert-org">IEEE RAS</span><span class="cert-date">Jun 2024</span></div>
+          <div class="cert-card reveal cert-c1"><div class="cert-icon">💻</div><h4>ECPC Competition</h4><span class="cert-org">Egyptian Collegiate Programming Contest</span><span class="cert-date">2× participant</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section">
+      <div class="container">
+        <div class="section-label">let's talk</div>
+        <h2 class="section-title reveal">I'm a DM away ✦<br /><span class="gradient-text">seriously, reach out.</span>
+        </h2>
+        <p class="contact-sub reveal">Open to data engineering roles remote, hybrid, wherever. Cairo is home but I'm not
+          attached to the coordinates.</p>
+        <div class="contact-grid">
+          <a href="mailto:alaa.ali.swe@gmail.com" class="contact-card reveal" id="email-card">
+            <div class="cc-icon">✉️</div>
+            <span class="cc-label">email me</span>
+            <span class="cc-val">alaa.ali.swe@gmail.com</span>
+          </a>
+          <a href="https://www.linkedin.com/in/alaa-ali-software-engineer/" target="_blank" class="contact-card reveal"
+            id="linkedin-card">
+            <div class="cc-icon">💼</div>
+            <span class="cc-label">connect on</span>
+            <span class="cc-val">LinkedIn</span>
+          </a>
+          <a href="https://github.com/Alaa-Alyy" target="_blank" class="contact-card reveal" id="github-card">
+            <div class="cc-icon">⌨️</div>
+            <span class="cc-label">see my code</span>
+            <span class="cc-val">github/Alaa-Alyy</span>
+          </a>
+          <a href="tel:+201015244087" class="contact-card reveal" id="phone-card">
+            <div class="cc-icon">📞</div>
+            <span class="cc-label">call / WhatsApp</span>
+            <span class="cc-val">+20 101 524 4087</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p>designed & coded by <strong>Alaa Ali</strong> Cairo, 2026 ✦</p>
+      <p class="footer-sub">data engineer · ml · open to the world</p>
+    </footer>
+
+  </div><!-- end #site-wrapper -->
+
+  <script src="app.js"></script>
+</body>
+
+</html>
