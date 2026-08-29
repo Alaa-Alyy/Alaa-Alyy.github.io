@@ -452,7 +452,7 @@
             <div class="project-header">
               <div class="project-icon">🌿</div>
               <div class="project-links">
-                <a href="https://github.com/Alaa-Alyy" target="_blank" class="proj-link">GitHub →</a>
+                <a href="https://github.com/alberehap/plant-disease-classification" target="_blank" class="proj-link">GitHub →</a>
               </div>
             </div>
             <h3>Plant Disease Detection</h3>
@@ -464,13 +464,17 @@
               <div class="pm"><span class="pm-val">XAI</span><span class="pm-key">Grad-CAM</span></div>
             </div>
             <ul class="proj-bullets">
-              <li>EfficientNet + ResNet via TensorFlow/Keras picked the architecture that actually fit the problem</li>
-              <li>Built the augmentation pipeline myself no leakage, clean splits</li>
-              <li>94% validation accuracy on a real-world dataset</li>
-              <li>Grad-CAM overlays so it's not a black box anymore</li>
+              <li>EfficientNet + ResNet via TensorFlow/Keras picked the architecture that best fit the classification task.</li>
+              <li>Built a complete image preprocessing & augmentation pipeline with clean train/validation splits and no data leakage.</li>
+              <li>Trained models on 5,000+ leaf images, achieving 94% validation accuracy on disease classification.</li>
+              <li>Applied transfer learning and fine-tuning to improve classification performance on the plant disease dataset.</li>
+              <li>Built an end-to-end inference pipeline for predicting diseases from unseen leaf images.</li>
+              <li>Added Grad-CAM explainability to visualize the regions driving model predictions and make the classifier more interpretable.</li>
+              <li>Compared model performance using accuracy, precision, recall, and F1-score to select the best-performing architecture.</li>
+              <li>Documented the complete workflow from data preparation → augmentation → training → evaluation → inference → XAI.</li>
             </ul>
             <div class="proj-tech">
-              <span>TensorFlow</span><span>Keras</span><span>EfficientNet</span><span>ResNet</span><span>Grad-CAM</span>
+              <span>TensorFlow</span><span>Keras</span><span>EfficientNet</span><span>ResNet</span><span>Grad-CAM</span><span>Python</span><span>Transfer Learning</span><span>Computer Vision</span><span>Deep Learning</span>
             </div>
           </div>
 
