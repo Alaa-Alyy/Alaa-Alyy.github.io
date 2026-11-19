@@ -133,7 +133,7 @@ function animateCursor() {
 }
 animateCursor();
 
-document.querySelectorAll('a,button,.chip,.cert-card,.contact-card,.project-card').forEach(el => {
+document.querySelectorAll('a,button,.chip,.cert-row,.contact-card,.project-card').forEach(el => {
   el.addEventListener('mouseenter', () => { cursorDot.style.transform = 'translate(-50%,-50%) scale(2)'; cursorRing.style.transform = 'translate(-50%,-50%) scale(1.5)'; cursorRing.style.borderColor = 'var(--pink)'; });
   el.addEventListener('mouseleave', () => { cursorDot.style.transform = 'translate(-50%,-50%) scale(1)'; cursorRing.style.transform = 'translate(-50%,-50%) scale(1)'; cursorRing.style.borderColor = 'var(--violet2)'; });
 });
@@ -387,7 +387,7 @@ const groupObs = new IntersectionObserver(entries => {
     }
   });
 }, { threshold: 0.05 });
-document.querySelectorAll('.stack-groups,.projects-grid,.certs-grid,.contact-grid,.timeline').forEach(g => groupObs.observe(g));
+document.querySelectorAll('.stack-groups,.projects-grid,.cert-list,.contact-grid,.timeline').forEach(g => groupObs.observe(g));
 
 // ===== ACTIVE NAV =====
 const sections = document.querySelectorAll('section[id]');
