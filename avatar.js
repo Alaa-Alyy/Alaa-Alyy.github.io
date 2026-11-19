@@ -1,5 +1,5 @@
 // ===== 3D GUIDE AVATAR =====
-// A small three.js girl that pops up at the bottom-left each time a new
+// A small three.js girl that pops up at the bottom-right each time a new
 // section reaches the middle of the screen, waves, and says its name.
 // Click her to turn her voice on or off (off by default).
 (function () {
@@ -29,8 +29,8 @@
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
-  camera.position.set(0, 1.3, 4.3);
-  camera.lookAt(0, 1.15, 0);
+  camera.position.set(0, 1.12, 5.0);
+  camera.lookAt(0, 1.02, 0);
 
   scene.add(new THREE.HemisphereLight(0xfff6ee, 0x30443a, 0.62));
   const rim = new THREE.DirectionalLight(0x9fe0bd, 0.35);
@@ -48,22 +48,45 @@
   const DARK = mat(0x1b1512);
   const WHITE = new THREE.MeshBasicMaterial({ color: 0xffffff });
   const CHEEK = new THREE.MeshBasicMaterial({ color: 0xe58a8a, transparent: true, opacity: 0.45 });
+  const CAMEL = mat(0xc9a07a, 0.9);
+  const SHOE = mat(0x2a1a1c, 0.5);
   const GOLD = new THREE.MeshStandardMaterial({ color: 0xd9b25c, roughness: 0.3, metalness: 0.6 });
 
   const girl = new THREE.Group();
   scene.add(girl);
 
-  // torso
-  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.44, 0.85, 32), TOP);
-  torso.position.y = 0.55;
-  girl.add(torso);
+  const lathe = (pts, m, phiStart = 0, phiLen = Math.PI * 2) => {
+    const g = new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), 48, phiStart, phiLen);
+    const mesh = new THREE.Mesh(g, m);
+    return mesh;
+  };
 
-  // hijab drape over shoulders
-  const drapePts = [[0.26, 0], [0.38, -0.1], [0.52, -0.3], [0.6, -0.5], [0.62, -0.58]]
-    .map(([x, y]) => new THREE.Vector2(x, y));
-  const drape = new THREE.Mesh(new THREE.LatheGeometry(drapePts, 40), HIJAB);
-  drape.position.y = 1.2;
-  girl.add(drape);
+  // long A-line dress (emerald)
+  girl.add(lathe([[0.001, 1.02], [0.27, 1.02], [0.33, 0.85], [0.35, 0.62], [0.41, 0.3], [0.49, 0.02], [0.001, 0.02]], TOP));
+
+  // long open duster (camel), open at the front
+  const COAT_OPEN = 0.62;
+  const coatMat = CAMEL.clone(); coatMat.side = THREE.DoubleSide;
+  girl.add(lathe([[0.295, 1.0], [0.36, 0.86], [0.385, 0.62], [0.445, 0.3], [0.53, 0.06]], coatMat, COAT_OPEN, Math.PI * 2 - COAT_OPEN * 2));
+
+  // shoes peeking out
+  [-0.13, 0.13].forEach(x => {
+    const sh = new THREE.Mesh(new THREE.SphereGeometry(0.085, 16, 12), SHOE);
+    sh.scale.set(1, 0.55, 1.5);
+    sh.position.set(x, 0.03, 0.2);
+    girl.add(sh);
+  });
+
+  // hijab wrap around neck and shoulders, ending at the chest
+  const wrapMat = HIJAB.clone(); wrapMat.side = THREE.DoubleSide;
+  const hijabWrap = lathe([[0.2, 1.36], [0.27, 1.24], [0.34, 1.12], [0.39, 0.99], [0.41, 0.9], [0.4, 0.84]], wrapMat);
+  girl.add(hijabWrap);
+  // one end of the hijab falling over the front shoulder
+  const tail = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), HIJAB2);
+  tail.scale.set(0.12, 0.3, 0.05);
+  tail.position.set(0.15, 0.86, 0.36);
+  tail.rotation.z = 0.18;
+  girl.add(tail);
 
   // head group (so it can tilt and follow the cursor)
   const head = new THREE.Group();
@@ -91,7 +114,7 @@
   crown.rotation.x = 0.28;
   head.add(crown);
   const pin = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 12), GOLD);
-  pin.position.set(0.24, -0.36, 0.3);
+  pin.position.set(-0.25, -0.34, 0.3);
   head.add(pin);
 
   // eyes
@@ -130,18 +153,21 @@
   // arms (pivot at the shoulder)
   function makeArm(side) {
     const pivot = new THREE.Group();
-    pivot.position.set(0.36 * side, 0.92, 0);
-    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.5, 16), TOP);
-    sleeve.position.y = -0.25;
-    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.085, 16, 16), SKIN);
-    hand.position.y = -0.53;
+    pivot.position.set(0.35 * side, 0.97, 0);
+    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.12, 0.48, 16, 1, true), coatMat);
+    sleeve.position.y = -0.24;
+    const cuff = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 12), TOP);
+    cuff.position.y = -0.47;
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.075, 16, 16), SKIN);
+    hand.position.y = -0.54;
+    pivot.add(cuff);
     pivot.add(sleeve, hand);
     pivot.rotation.z = 0.12 * side;
     girl.add(pivot);
     return pivot;
   }
-  const armR = makeArm(1);
-  makeArm(-1);
+  makeArm(1);
+  const armWave = makeArm(-1);
 
   // ---------- sizing ----------
   function resize() {
@@ -226,8 +252,8 @@
     head.rotation.z = Math.sin(t * 1.6) * 0.04 * calm;
 
     // wave
-    const target = now < waveUntil ? 2.55 + Math.sin(t * 12) * 0.3 * calm : 0.12;
-    armR.rotation.z += (target - armR.rotation.z) * 0.18;
+    const target = now < waveUntil ? -2.55 + Math.sin(t * 12) * 0.3 * calm : -0.12;
+    armWave.rotation.z += (target - armWave.rotation.z) * 0.18;
 
     // talk
     const talking = now < talkUntil;
