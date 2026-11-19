@@ -36,20 +36,23 @@
   const rim = new THREE.DirectionalLight(0x9fe0bd, 0.35);
   rim.position.set(-3, 2, -2);
   scene.add(rim);
+  const rim2 = new THREE.DirectionalLight(0xd8e6dd, 0.45);
+  rim2.position.set(3, 1.5, -2.5);
+  scene.add(rim2);
   const key = new THREE.DirectionalLight(0xffffff, 0.55);
   key.position.set(2, 3, 4);
   scene.add(key);
 
   const mat = (c, r = 0.75) => new THREE.MeshStandardMaterial({ color: c, roughness: r, metalness: 0 });
   const SKIN = mat(0xe3aa86, 0.6);
-  const HIJAB = mat(0x6e1832, 0.85);   // burgundy
-  const HIJAB2 = mat(0x7d1f3b, 0.85);
-  const TOP = mat(0x24704a, 0.8);     // emerald
+  const HIJAB = mat(0x2e8b57, 0.85);   // emerald scarf (site colour)
+  const HIJAB2 = mat(0x277a4c, 0.85);
+  const TOP = mat(0x26262a, 0.7);     // black top
+  const PANTS = mat(0x1d1d21, 0.8);  // black wide-leg trousers
   const DARK = mat(0x1b1512);
   const WHITE = new THREE.MeshBasicMaterial({ color: 0xffffff });
   const CHEEK = new THREE.MeshBasicMaterial({ color: 0xe58a8a, transparent: true, opacity: 0.45 });
-  const CAMEL = mat(0xc9a07a, 0.9);
-  const SHOE = mat(0x2a1a1c, 0.5);
+    const SHOE = mat(0xece6dc, 0.5);     // white sneakers
   const GOLD = new THREE.MeshStandardMaterial({ color: 0xd9b25c, roughness: 0.3, metalness: 0.6 });
 
   const girl = new THREE.Group();
@@ -61,30 +64,33 @@
     return mesh;
   };
 
-  // long A-line dress (emerald)
-  girl.add(lathe([[0.001, 1.02], [0.27, 1.02], [0.33, 0.85], [0.35, 0.62], [0.41, 0.3], [0.49, 0.02], [0.001, 0.02]], TOP));
+  // black top ending at the hips
+  girl.add(lathe([[0.001, 1.02], [0.27, 1.02], [0.33, 0.88], [0.335, 0.74], [0.355, 0.6], [0.001, 0.6]], TOP));
 
-  // long open duster (camel), open at the front
-  const COAT_OPEN = 0.62;
-  const coatMat = CAMEL.clone(); coatMat.side = THREE.DoubleSide;
-  girl.add(lathe([[0.295, 1.0], [0.36, 0.86], [0.385, 0.62], [0.445, 0.3], [0.53, 0.06]], coatMat, COAT_OPEN, Math.PI * 2 - COAT_OPEN * 2));
+  // black wide-leg trousers
+  girl.add(lathe([[0.001, 0.63], [0.32, 0.63], [0.335, 0.5], [0.001, 0.47]], PANTS));
+  [-0.175, 0.175].forEach(x => {
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.165, 0.56, 24), PANTS);
+    leg.position.set(x, 0.3, 0);
+    girl.add(leg);
+  });
 
   // shoes peeking out
-  [-0.13, 0.13].forEach(x => {
-    const sh = new THREE.Mesh(new THREE.SphereGeometry(0.085, 16, 12), SHOE);
-    sh.scale.set(1, 0.55, 1.5);
-    sh.position.set(x, 0.03, 0.2);
+  [-0.175, 0.175].forEach(x => {
+    const sh = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 12), SHOE);
+    sh.scale.set(1, 0.5, 1.6);
+    sh.position.set(x, 0.03, 0.17);
     girl.add(sh);
   });
 
   // hijab wrap around neck and shoulders, ending at the chest
   const wrapMat = HIJAB.clone(); wrapMat.side = THREE.DoubleSide;
-  const hijabWrap = lathe([[0.2, 1.36], [0.27, 1.24], [0.34, 1.12], [0.39, 0.99], [0.41, 0.9], [0.4, 0.84]], wrapMat);
+  const hijabWrap = lathe([[0.2, 1.36], [0.27, 1.25], [0.33, 1.14], [0.365, 1.04], [0.37, 0.97]], wrapMat);
   girl.add(hijabWrap);
   // one end of the hijab falling over the front shoulder
   const tail = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), HIJAB2);
-  tail.scale.set(0.12, 0.3, 0.05);
-  tail.position.set(0.15, 0.86, 0.36);
+  tail.scale.set(0.1, 0.24, 0.05);
+  tail.position.set(0.15, 0.93, 0.33);
   tail.rotation.z = 0.18;
   girl.add(tail);
 
@@ -154,7 +160,7 @@
   function makeArm(side) {
     const pivot = new THREE.Group();
     pivot.position.set(0.35 * side, 0.97, 0);
-    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.12, 0.48, 16, 1, true), coatMat);
+    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.09, 0.48, 16), TOP);
     sleeve.position.y = -0.24;
     const cuff = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.08, 12), TOP);
     cuff.position.y = -0.47;
