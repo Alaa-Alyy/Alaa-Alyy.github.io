@@ -32,8 +32,8 @@
       r: Math.random() * 1.6 + 0.3,
       tw: Math.random() * Math.PI * 2,
       sp: Math.random() * 0.007 + 0.003,
-      col: Math.random() > 0.85 ? '#ff6baa'
-         : Math.random() > 0.7  ? '#c77dff' : '#ffffff',
+      col: Math.random() > 0.85 ? '#5fae7e'
+         : Math.random() > 0.7  ? '#c9ced1' : '#ffffff',
     });
   }
 
@@ -42,12 +42,12 @@
     ictx.clearRect(0, 0, iW, iH);
     // subtle nebula glow
     const g1 = ictx.createRadialGradient(iW*.75, iH*.25, 0, iW*.75, iH*.25, iW*.45);
-    g1.addColorStop(0, 'rgba(255,45,120,.07)');
+    g1.addColorStop(0, 'rgba(46,139,87,.07)');
     g1.addColorStop(1, 'transparent');
     ictx.fillStyle = g1; ictx.fillRect(0, 0, iW, iH);
 
     const g2 = ictx.createRadialGradient(iW*.2, iH*.7, 0, iW*.2, iH*.7, iW*.35);
-    g2.addColorStop(0, 'rgba(155,93,229,.07)');
+    g2.addColorStop(0, 'rgba(143,156,149,.07)');
     g2.addColorStop(1, 'transparent');
     ictx.fillStyle = g2; ictx.fillRect(0, 0, iW, iH);
 
@@ -210,7 +210,7 @@ document.addEventListener('mousemove', e => {
     const sp = document.createElement('div');
     sp.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;pointer-events:none;z-index:9997;font-size:${8+Math.random()*8}px;animation:sparkleOut .6s ease forwards;transform:translate(-50%,-50%)`;
     sp.textContent = ['✦','✧','⋆','★','✸'][Math.floor(Math.random()*5)];
-    sp.style.color = Math.random() > 0.5 ? '#ff2d78' : '#c77dff';
+    sp.style.color = Math.random() > 0.5 ? '#2e8b57' : '#c9ced1';
     document.body.appendChild(sp);
     setTimeout(() => sp.remove(), 600);
   }
@@ -236,7 +236,7 @@ function makeStar() {
     alpha: Math.random(),
     speed: Math.random() * 0.008 + 0.003,
     twinkle: Math.random() * Math.PI * 2,
-    color: Math.random() > 0.85 ? '#ff6baa' : Math.random() > 0.7 ? '#c77dff' : '#ffffff',
+    color: Math.random() > 0.85 ? '#5fae7e' : Math.random() > 0.7 ? '#c9ced1' : '#ffffff',
   };
 }
 function makeShootingStar() {
@@ -253,7 +253,7 @@ function makeSparkle() {
     x: Math.random() * W, y: Math.random() * H,
     life: 1, decay: 0.008 + Math.random() * 0.012,
     size: 2 + Math.random() * 3,
-    color: Math.random() > 0.5 ? '#ff2d78' : '#9b5de5',
+    color: Math.random() > 0.5 ? '#2e8b57' : '#8f9c95',
   };
 }
 
@@ -267,14 +267,14 @@ function drawCanvas() {
 
   // Deep space gradient bg
   const bg = ctx.createRadialGradient(W*0.7, H*0.2, 0, W*0.7, H*0.2, W*0.6);
-  bg.addColorStop(0, 'rgba(255,45,120,0.06)');
-  bg.addColorStop(0.5, 'rgba(155,93,229,0.04)');
+  bg.addColorStop(0, 'rgba(46,139,87,0.06)');
+  bg.addColorStop(0.5, 'rgba(143,156,149,0.04)');
   bg.addColorStop(1, 'transparent');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
 
   const bg2 = ctx.createRadialGradient(W*0.15, H*0.8, 0, W*0.15, H*0.8, W*0.4);
-  bg2.addColorStop(0, 'rgba(155,93,229,0.07)');
+  bg2.addColorStop(0, 'rgba(143,156,149,0.07)');
   bg2.addColorStop(1, 'transparent');
   ctx.fillStyle = bg2;
   ctx.fillRect(0, 0, W, H);
@@ -301,8 +301,8 @@ function drawCanvas() {
     ctx.save();
     ctx.globalAlpha = s.alpha;
     const grd = ctx.createLinearGradient(s.x, s.y, s.x - Math.cos(s.angle)*s.len, s.y - Math.sin(s.angle)*s.len);
-    grd.addColorStop(0, '#ff2d78');
-    grd.addColorStop(0.5, '#c77dff');
+    grd.addColorStop(0, '#2e8b57');
+    grd.addColorStop(0.5, '#c9ced1');
     grd.addColorStop(1, 'transparent');
     ctx.strokeStyle = grd;
     ctx.lineWidth = 2;
@@ -346,7 +346,7 @@ window.addEventListener('scroll', () => {
   const heroH = heroSection ? heroSection.offsetHeight : window.innerHeight;
 
   // Nav background
-  navbar.style.background = scrollY > 50 ? 'rgba(0,0,10,0.92)' : 'rgba(0,0,10,0.7)';
+  navbar.style.background = scrollY > 50 ? 'rgba(5,10,7,0.92)' : 'rgba(5,10,7,0.7)';
 
   // Hero photo: shrink & fade as user scrolls
   if (heroPhotoWrap) {
