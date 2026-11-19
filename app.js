@@ -210,7 +210,7 @@ document.addEventListener('mousemove', e => {
     const sp = document.createElement('div');
     sp.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;pointer-events:none;z-index:9997;font-size:${8+Math.random()*8}px;animation:sparkleOut .6s ease forwards;transform:translate(-50%,-50%)`;
     sp.textContent = ['✦','✧','⋆','★','✸'][Math.floor(Math.random()*5)];
-    sp.style.color = Math.random() > 0.5 ? '#2e8b57' : '#c9ced1';
+    sp.style.color = Math.random() > 0.5 ? '#2e8b57' : '#b04a6c';
     document.body.appendChild(sp);
     setTimeout(() => sp.remove(), 600);
   }
@@ -225,6 +225,7 @@ const canvas = document.getElementById('heroCanvas');
 const ctx = canvas.getContext('2d');
 let W, H, stars = [], shootingStars = [], sparkles = [];
 
+function isLight() { return document.documentElement.getAttribute('data-theme') === 'light'; }
 function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
 resize();
 window.addEventListener('resize', resize);
@@ -285,10 +286,8 @@ function drawCanvas() {
     const a = 0.3 + Math.abs(Math.sin(s.twinkle)) * 0.7;
     ctx.beginPath();
     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = s.color.replace(')', `,${a})`).replace('rgb', 'rgba').replace('#', 'rgba(').replace('ffffff', '255,255,255').replace('ff6baa', '255,107,170').replace('c77dff', '199,125,255');
-    // Simple approach:
     ctx.globalAlpha = a;
-    ctx.fillStyle = s.color;
+    ctx.fillStyle = isLight() ? (s.color === '#ffffff' ? '#3d5a4a' : s.color === '#c9ced1' ? '#8e2a4a' : '#2e8b57') : s.color;
     ctx.fill();
     ctx.globalAlpha = 1;
   });
@@ -346,7 +345,7 @@ window.addEventListener('scroll', () => {
   const heroH = heroSection ? heroSection.offsetHeight : window.innerHeight;
 
   // Nav background
-  navbar.style.background = scrollY > 50 ? 'rgba(5,10,7,0.92)' : 'rgba(5,10,7,0.7)';
+  navbar.style.background = scrollY > 50 ? 'var(--nav-bg-solid)' : 'var(--nav-bg)';
 
   // Hero photo: shrink & fade as user scrolls
   if (heroPhotoWrap) {
@@ -430,3 +429,16 @@ document.querySelectorAll('.project-card').forEach(card => {
   });
   card.addEventListener('mouseleave', () => { card.style.transform = ''; });
 });
+
+
+// ===== THEME TOGGLE =====
+(function () {
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+    navbar.style.background = window.scrollY > 50 ? 'var(--nav-bg-solid)' : 'var(--nav-bg)';
+  });
+})();

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+  <script>try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alaa Ali — AI Engineer</title>
@@ -82,6 +83,10 @@
         <li><a href="#certs">Certs</a></li>
         <li><a href="#contact" class="nav-cta">Say hi</a></li>
       </ul>
+      <button class="theme-toggle" id="themeToggle" aria-label="Switch between light and dark mode" title="Light / dark">
+        <svg class="ic-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+        <svg class="ic-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+      </button>
       <button class="hamburger" id="hamburger" aria-label="menu">&#9776;</button>
     </div>
     <ul class="mobile-menu" id="mobileMenu">
@@ -770,7 +775,16 @@
 
   </div><!-- end #site-wrapper -->
 
+  <!-- 3D guide: pops up on each section and says its name (click her for voice) -->
+  <div id="guide" aria-hidden="true" title="Click to turn my voice on / off">
+    <div class="guide-bubble"><span class="guide-kicker">you're in</span><span id="guideText"></span></div>
+    <canvas id="guideCanvas"></canvas>
+    <span class="guide-voice">voice <b class="on">on</b><b class="off">off</b></span>
+  </div>
+
   <script src="app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="avatar.js"></script>
 </body>
 
 </html>
