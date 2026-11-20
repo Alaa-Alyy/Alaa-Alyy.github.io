@@ -417,7 +417,9 @@
     resize();
     start();
     const skipEl = document.getElementById('intro-skip');
-    if (skipEl && !muted) skipEl.textContent = 'tap to hear Zumo 🔊';
+    const hiBtn = document.getElementById('sayHiBtn');
+    if (skipEl) skipEl.textContent = muted ? 'click anywhere to enter' : 'or just wait a moment';
+    if (hiBtn && muted) hiBtn.textContent = 'Enter the site →';
     // called by the intro's click handler: say the bubble's line, then let the intro end
     window.zumoIntroSpeak = function (onDone) {
       if (muted || !introMode) return false;
@@ -432,6 +434,7 @@
       player.addEventListener('error', fin, { once: true });
       setTimeout(fin, 7000);
       if (skipEl) skipEl.textContent = 'click again to skip';
+      if (hiBtn) { hiBtn.classList.add('talking'); hiBtn.textContent = 'Zumo is talking…'; }
       return true;
     };
     // when the bubble appears, try to say its line right away. Browsers allow this only
@@ -451,6 +454,7 @@
         moodName = 'happy'; moodUntil = now + 5200;
         if (player.duration && isFinite(player.duration)) talkUntil = now + player.duration * 1000;
         if (skipEl) skipEl.textContent = 'click to skip';
+        if (hiBtn) hiBtn.classList.add('gone');          // he's already talking, no need to ask
         const fin = () => {
           if (!window.zumoIntroBusy) return;
           window.zumoIntroBusy = false;

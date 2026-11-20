@@ -486,6 +486,24 @@ body.intro-active { overflow: hidden; }
   opacity: 1; transform: translateY(0);
 }
 
+/* "Say hi to Zumo" button inside the intro bubble */
+.bubble-btn {
+  margin-top: 1.1rem; display: inline-flex; align-items: center; gap: .5rem;
+  padding: .65rem 1.3rem; border-radius: 8px; border: 1px solid rgba(95,174,126,.6);
+  background: var(--pink); color: #fff; font-family: var(--ff); font-weight: 600; font-size: .95rem;
+  cursor: none; opacity: 0; transform: translateY(6px);
+  transition: opacity .4s ease .9s, transform .4s ease .9s, background .2s, box-shadow .2s;
+  animation: sayHiPulse 2.2s ease-in-out 1.6s infinite;
+}
+#speech-bubble.show .bubble-btn { opacity: 1; transform: translateY(0); }
+.bubble-btn:hover { background: var(--pink2); transform: translateY(-2px); }
+.bubble-btn.talking { background: transparent; color: var(--pink2); animation: none; pointer-events: none; }
+.bubble-btn.gone { display: none; }
+@keyframes sayHiPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(46,139,87,.45); }
+  50%      { box-shadow: 0 0 0 9px rgba(46,139,87,0); }
+}
+
 /* Stars hint text at bottom */
 #intro-skip {
   position: absolute; bottom: 2.5rem; left: 50%;

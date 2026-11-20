@@ -108,7 +108,7 @@
     if (speaking) return;                                   // the click path exits when Zumo finishes
     if (window.zumoIntroBusy) window.zumoIntroEnded = () => setTimeout(exitIntro, 350);
     else exitIntro();
-  }, 7500);
+  }, 8500);
 
   // First click: Zumo says the bubble's line (browsers need a click before any sound).
   // Click again (or no Zumo / muted): skip straight to the site.
