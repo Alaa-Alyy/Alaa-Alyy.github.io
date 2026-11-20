@@ -419,6 +419,11 @@ body.intro-active { overflow: hidden; }
 }
 #astro-wrap.landed .astro-trail { opacity: 1; }
 
+/* Zumo takes the astronaut's place in the intro (the emoji stays as a fallback) */
+#introZumoSlot.has-zumo { font-size: 0; animation: none; filter: none; }
+#introZumoSlot.has-zumo canvas { display: block; width: 250px; height: 315px; }
+@media (max-width: 700px) { #introZumoSlot.has-zumo canvas { width: 160px; height: 200px; } }
+
 /* Speech bubble */
 #speech-bubble {
   position: relative;

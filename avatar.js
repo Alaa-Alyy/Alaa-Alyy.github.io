@@ -374,7 +374,7 @@
 
     // body and head follow the cursor smoothly
     lookX += (mx - lookX) * 0.08; lookY += (my - lookY) * 0.08;
-    bot.rotation.y = -0.25 + lookX * 0.25;
+    bot.rotation.y = (introMode ? 0.35 : -0.25) + lookX * 0.25;
     head.rotation.y = mood === 'look' ? Math.sin(t * 3) * 0.35 : lookX * 0.35;
     head.rotation.x = mood === 'shy' ? 0.18 : lookY * 0.15;
     const wiggle = mood === 'happy' ? Math.sin(t * 5) * 0.06 : mood === 'shy' ? Math.sin(t * 9) * 0.05 : 0;
@@ -383,7 +383,10 @@
     // arms: wave with the page-side arm; hands up over the face when squinting
     let wTarget = -0.28 + Math.sin(t * 1.8) * 0.05 * calm;
     let oTarget = 0.28 - Math.sin(t * 1.8) * 0.05 * calm;
-    if (now < waveUntil) wTarget = -2.5 + Math.sin(t * 13) * 0.35;
+    if (now < waveUntil) {
+      if (introMode) oTarget = 2.5 + Math.sin(t * 13) * 0.35;   // bubble is on his right in the intro
+      else wTarget = -2.5 + Math.sin(t * 13) * 0.35;
+    }
     if (mood === 'squint') { wTarget = -2.2; oTarget = 2.2; }
     if (mood === 'shy') { wTarget = -0.6; oTarget = 0.6; }
     armWave.rotation.z += (wTarget - armWave.rotation.z) * Math.min(1, dt * 9);
@@ -413,6 +416,35 @@
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && wrap.classList.contains('show')) start(); });
 
+  // ---------- intro: Zumo replaces the astronaut, then moves to his corner ----------
+  let introMode = false;
+  const introSlot = document.getElementById('introZumoSlot');
+  if (introSlot && document.body.classList.contains('intro-active')) {
+    introMode = true;
+    introSlot.textContent = '';
+    introSlot.classList.add('has-zumo');
+    introSlot.appendChild(canvas);
+    resize();
+    start();
+    const introBubble = document.getElementById('speech-bubble');
+    if (introBubble) new MutationObserver((_, mo) => {
+      if (!introBubble.classList.contains('show')) return;
+      mo.disconnect();
+      const now = performance.now();
+      waveUntil = reduceMotion ? 0 : now + 2400;
+      moodName = 'happy'; moodUntil = now + 3200;
+      talkUntil = now + 1600;
+    }).observe(introBubble, { attributes: true, attributeFilter: ['class'] });
+  }
+  function leaveIntro() {
+    if (!introMode) return;
+    introMode = false;
+    wrap.insertBefore(canvas, wrap.querySelector('.guide-voice'));
+    waveUntil = 0; moodUntil = 0;
+    resize();
+    if (!wrap.classList.contains('show')) running = false;
+  }
+
   // ---------- greeting after the intro ----------
   let greeted = false;
   function greet() {
@@ -422,7 +454,7 @@
   }
   if (!document.body.classList.contains('intro-active')) greet();
   else new MutationObserver((_, mo) => {
-    if (!document.body.classList.contains('intro-active')) { mo.disconnect(); greet(); }
+    if (!document.body.classList.contains('intro-active')) { mo.disconnect(); leaveIntro(); greet(); }
   }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // ---------- section watcher ----------
