@@ -1,7 +1,8 @@
 // ===== ZUMO: the site's little AI guide robot =====
 // Greets visitors, pops up at the bottom-right with a line for each section,
 // comments on project cards, and has a few easter eggs (rapid clicks, idling,
-// switching to light mode). One click turns its voice on/off (off by default).
+// switching to light mode). Its voice (pre-recorded clips in /voice) is on by
+// default and starts after the visitor's first click; one click on Zumo mutes it.
 (function () {
   const wrap = document.getElementById('guide');
   const bubbleText = document.getElementById('guideText');
@@ -19,8 +20,8 @@
     contact: ['contact', 'Go on, say hi. She replies!'],
   };
   const PROJECT_LINES = [
-    [/elsewhere/i, 'This one found Mars on Earth!'],
-    [/roomly/i, '12 agents, one living room.'],
+    [/elsewhere/i, 'This one found Mars on Earth!', 'elsewhere'],
+    [/roomly/i, '12 agents, one living room.', 'roomly'],
   ];
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -217,8 +218,8 @@
         roundRect(cx - 14, cy - h / 2, 28, h, 13);
       }
     });
-    if (now < talkUntil) {                             // talking mouth
-      const o = 6 + Math.abs(Math.sin(now / 70)) * 12;
+    if (now < talkUntil || mouthLevel > 0.05) {         // talking mouth (follows the voice when it plays)
+      const o = mouthLevel >= 0 ? 4 + mouthLevel * 20 : 6 + Math.abs(Math.sin(now / 70)) * 12;
       roundRect(W / 2 - 14 + ex * 0.6, 112 + ey - o / 2, 28, o, 7);
     } else {                                           // smile
       fctx.lineWidth = 6; fctx.lineCap = 'round';
@@ -247,21 +248,76 @@
     my = (e.clientY / window.innerHeight) * 2 - 1;
   });
 
-  // ---------- voice (opt-in) ----------
-  let voiceOn = false, voice = null;
-  function pickVoice() {
-    const vs = window.speechSynthesis ? speechSynthesis.getVoices() : [];
-    voice = vs.find(v => /en/i.test(v.lang) && /female|zira|aria|jenny|samantha|susan|hazel|libby|sonia/i.test(v.name))
-      || vs.find(v => /en/i.test(v.lang)) || null;
+  // ---------- voice: pre-recorded robot-boy clips in /voice ----------
+  // Sound is on by default, but browsers only allow audio after the visitor's
+  // first click/tap/key on the page, so clips wait for that first gesture.
+  const VOICE_V = '202611202200';
+  const CLIP_IDS = ['greet', 'about', 'stack', 'experience', 'projects', 'education', 'competitions', 'certs',
+    'contact', 'elsewhere', 'roomly', 'tickle', 'idle', 'eyes', 'better', 'mute', 'unmute'];
+  let muted = false;
+  try { muted = localStorage.getItem('zumoMuted') === '1'; } catch (e) {}
+  let activated = !!(navigator.userActivation && navigator.userActivation.hasBeenActive);
+  let actx = null, analyser = null, levelBuf = null, curAudio = null;
+  let pendingClip = null, pendingAt = 0, mouthLevel = -1;
+  const clips = {};
+
+  function getClip(id) {
+    if (!clips[id]) {
+      const a = new Audio('voice/' + id + '.mp3?v=' + VOICE_V);
+      a.preload = 'auto';
+      clips[id] = a;
+      hook(a);
+    }
+    return clips[id];
   }
-  if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-  function speak(text) {
-    if (!voiceOn || !window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/[!…👀]/gu, ''));
-    if (voice) u.voice = voice;
-    u.pitch = 1.35; u.rate = 1.05; u.volume = 0.9;
-    speechSynthesis.speak(u);
+  function hook(a) {
+    if (!actx || a.__hooked) return;
+    try { actx.createMediaElementSource(a).connect(analyser); a.__hooked = true; } catch (e) {}
+  }
+  function ensureAudio() {
+    if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      actx = new AC();
+      analyser = actx.createAnalyser();
+      analyser.fftSize = 512;
+      levelBuf = new Uint8Array(analyser.fftSize);
+      analyser.connect(actx.destination);
+      Object.values(clips).forEach(hook);
+    } catch (e) { actx = null; analyser = null; }
+  }
+  function playClip(id) {
+    if (!id) return;
+    if (muted) return;
+    if (!activated) { pendingClip = id; pendingAt = performance.now(); return; }
+    if (curAudio) { curAudio.pause(); }
+    const a = getClip(id);
+    try { a.currentTime = 0; } catch (e) {}
+    const p = a.play();
+    if (p && p.catch) p.catch(() => {});
+    curAudio = a;
+    const setTalk = () => { if (a.duration && isFinite(a.duration)) talkUntil = performance.now() + a.duration * 1000; };
+    if (a.readyState >= 1) setTalk(); else a.addEventListener('loadedmetadata', setTalk, { once: true });
+  }
+  function onFirstGesture() {
+    if (activated && actx) return;
+    activated = true;
+    ensureAudio();
+    CLIP_IDS.forEach(getClip);       // small files (~220 KB in total): warm them up
+    if (pendingClip && wrap.classList.contains('show') && performance.now() - pendingAt < 4000) playClip(pendingClip);
+    pendingClip = null;
+  }
+  ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, onFirstGesture, { capture: true, passive: true }));
+  if (activated) { ensureAudio(); }
+
+  function readMouth() {
+    if (!analyser || !curAudio || curAudio.paused || curAudio.ended) { mouthLevel = -1; return; }
+    analyser.getByteTimeDomainData(levelBuf);
+    let sum = 0;
+    for (let i = 0; i < levelBuf.length; i++) { const v = (levelBuf[i] - 128) / 128; sum += v * v; }
+    const rms = Math.sqrt(sum / levelBuf.length);
+    mouthLevel = Math.min(1, rms * 7);
   }
 
   // ---------- show / hide ----------
@@ -271,7 +327,7 @@
 
   function say(kicker, line, opts = {}) {
     if (document.body.classList.contains('intro-active')) return;
-    const { mood: m = 'happy', ms = 3600, wave = true, moodMs = 2200 } = opts;
+    const { mood: m = 'happy', ms = 3600, wave = true, moodMs = 2200, clip = null } = opts;
     if (kickerEl) kickerEl.textContent = kicker;
     bubbleText.textContent = line;
     resize();
@@ -282,7 +338,7 @@
     waveUntil = wave && !reduceMotion ? now + 1900 : 0;
     moodName = m; moodUntil = now + moodMs;
     talkUntil = now + Math.min(1800, 300 + line.length * 45);
-    speak(line);
+    playClip(clip);
     start();
     clearTimeout(hideTimer);
     hideTimer = setTimeout(hide, ms);
@@ -305,6 +361,7 @@
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     const t = now / 1000, calm = reduceMotion ? 0 : 1;
     mood = now < moodUntil ? moodName : 'idle';
+    readMouth();
 
     // float + a small squash-and-stretch when it pops in
     const y = Math.sin(t * 2.1) * 0.06 * calm;
@@ -337,7 +394,7 @@
     const force = (-vel * 0.12 - head.rotation.z * 0.6) - antenna.rotation.z;
     antV += force * 60 * dt; antV *= Math.pow(0.02, dt);
     antenna.rotation.z += antV * dt;
-    tipMat.color.setHSL(0.42, 0.65, 0.48 + Math.sin(t * 4) * 0.12);
+    tipMat.color.setHSL(0.42, 0.65, (mouthLevel > 0 ? 0.55 + mouthLevel * 0.2 : 0.48 + Math.sin(t * 4) * 0.12));
 
     // chest core pulse and orbiting nodes
     coreMat.color.setHSL(0.42, 0.7, 0.42 + Math.sin(t * 3) * 0.12);
@@ -361,7 +418,7 @@
   function greet() {
     if (greeted) return;
     greeted = true;
-    setTimeout(() => say('hello', "Hi! I'm Zumo, Alaa's AI guide", { ms: 4200 }), 900);
+    setTimeout(() => say('hello', "Hi! I'm Zumo, Alaa's AI guide", { ms: 4200, clip: 'greet' }), 900);
   }
   if (!document.body.classList.contains('intro-active')) greet();
   else new MutationObserver((_, mo) => {
@@ -379,7 +436,7 @@
       pending = setTimeout(() => {
         current = id;
         const l = LINES[id];
-        if (l) say(l[0], l[1]);
+        if (l) say(l[0], l[1], { clip: id });
         else if (id !== 'hero') hide();
       }, 280);
     });
@@ -396,11 +453,12 @@
       const now = performance.now();
       if (now - (lastCardTalk.get(card) || -1e9) < 8000) return;
       lastCardTalk.set(card, now);
-      say('psst', hit[1], { wave: false, ms: 3200 });
+      say('psst', hit[1], { wave: false, ms: 3200, clip: hit[2] });
     });
   });
 
-  // ---------- clicks: one click = voice on/off, rapid clicks = tickles ----------
+  // ---------- clicks: one click = mute/unmute, rapid clicks = tickles ----------
+  wrap.classList.toggle('voice-on', !muted);
   let clicks = [], clickTimer = null;
   wrap.addEventListener('click', () => {
     const now = performance.now();
@@ -408,15 +466,19 @@
     clearTimeout(clickTimer);
     if (clicks.length >= 3) {
       clicks = [];
-      say('hey!', 'beep boop… okay, that tickles', { mood: 'shy', wave: false, moodMs: 2400, ms: 3600 });
+      say('hey!', 'beep boop… okay, that tickles', { mood: 'shy', wave: false, moodMs: 2400, ms: 3600, clip: 'tickle' });
       return;
     }
     clickTimer = setTimeout(() => {
-      voiceOn = !voiceOn;
-      wrap.classList.toggle('voice-on', voiceOn);
-      if (!voiceOn && window.speechSynthesis) speechSynthesis.cancel();
-      if (voiceOn) say('voice on', 'I can talk now!', { wave: false, ms: 3000 });
-      else say('voice off', 'Okay, quiet mode.', { wave: false, ms: 2600 });
+      if (!muted) {
+        say('voice off', 'Okay, quiet mode.', { wave: false, ms: 2600, clip: 'mute' });
+        muted = true;
+      } else {
+        muted = false;
+        say('voice on', "I'm back!", { wave: false, ms: 2600, clip: 'unmute' });
+      }
+      wrap.classList.toggle('voice-on', !muted);
+      try { localStorage.setItem('zumoMuted', muted ? '1' : '0'); } catch (e) {}
     }, 320);
   });
 
@@ -428,7 +490,7 @@
     idleTimer = setTimeout(() => {
       if (idleShown || document.hidden) return;
       idleShown = true;
-      say('hmm…', 'still there? 👀', { mood: 'look', wave: false, moodMs: 3000, ms: 4200 });
+      say('hmm…', 'still there? 👀', { mood: 'look', wave: false, moodMs: 3000, ms: 4200, clip: 'idle' });
     }, 60000);
   }
   ['scroll', 'mousemove', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, bump, { passive: true }));
@@ -439,8 +501,8 @@
   if (themeBtn) themeBtn.addEventListener('click', () => {
     setTimeout(() => {
       const light = document.documentElement.getAttribute('data-theme') === 'light';
-      if (light) say('whoa', 'my eyes!', { mood: 'squint', wave: false, moodMs: 1400, ms: 2800 });
-      else say('ahh', 'much better.', { mood: 'happy', wave: false, moodMs: 1600, ms: 2600 });
+      if (light) say('whoa', 'my eyes!', { mood: 'squint', wave: false, moodMs: 1400, ms: 2800, clip: 'eyes' });
+      else say('ahh', 'much better.', { mood: 'happy', wave: false, moodMs: 1600, ms: 2600, clip: 'better' });
     }, 50);
   });
 
