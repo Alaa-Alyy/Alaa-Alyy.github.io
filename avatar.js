@@ -252,8 +252,8 @@
   // One plain <audio> element plays every clip (reliable everywhere, unlocked once).
   // Sound is on by default, but browsers only allow it after the visitor's first
   // click/tap/key on the page. The mouth follows a precomputed loudness envelope.
-  const VOICE_V = '202611210200';
-  const CLIP_IDS = ['greet', 'about', 'stack', 'experience', 'projects', 'education', 'competitions', 'certs',
+  const VOICE_V = '202611210300';
+  const CLIP_IDS = ['intro', 'greet', 'about', 'stack', 'experience', 'projects', 'education', 'competitions', 'certs',
     'contact', 'elsewhere', 'roomly', 'tickle', 'idle', 'eyes', 'better', 'mute', 'unmute'];
   const MUTE_KEY = 'zumoMute2';
   const clipUrl = id => 'voice/' + id + '.mp3?v=' + VOICE_V;
@@ -416,6 +416,24 @@
     introSlot.appendChild(canvas);
     resize();
     start();
+    const skipEl = document.getElementById('intro-skip');
+    if (skipEl && !muted) skipEl.textContent = 'tap to hear Zumo 🔊';
+    // called by the intro's click handler: say the bubble's line, then let the intro end
+    window.zumoIntroSpeak = function (onDone) {
+      if (muted || !introMode) return false;
+      activated = true;
+      const now = performance.now();
+      waveUntil = reduceMotion ? 0 : now + 2600;
+      moodName = 'happy'; moodUntil = now + 5200;
+      playClip('intro');
+      let finished = false;
+      const fin = () => { if (finished) return; finished = true; if (onDone) onDone(); };
+      player.addEventListener('ended', fin, { once: true });
+      player.addEventListener('error', fin, { once: true });
+      setTimeout(fin, 7000);
+      if (skipEl) skipEl.textContent = 'click again to skip';
+      return true;
+    };
     const introBubble = document.getElementById('speech-bubble');
     if (introBubble) new MutationObserver((_, mo) => {
       if (!introBubble.classList.contains('show')) return;

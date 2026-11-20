@@ -102,11 +102,22 @@
   // Speech bubble pops in after astronaut lands
   setTimeout(() => bubble.classList.add('show'), 2300);
 
-  // Auto-exit after the full scene
-  setTimeout(exitIntro, 5500);
+  // Auto-exit after the full scene (waits while Zumo is talking)
+  let speaking = false;
+  setTimeout(() => { if (!speaking) exitIntro(); }, 7500);
 
-  // Click / tap anywhere to skip
-  overlay.addEventListener('click', exitIntro);
+  // First click: Zumo says the bubble's line (browsers need a click before any sound).
+  // Click again (or no Zumo / muted): skip straight to the site.
+  overlay.addEventListener('click', () => {
+    if (speaking || done) { exitIntro(); return; }
+    if (window.zumoIntroSpeak) {
+      astroWrap.classList.add('landed');
+      bubble.classList.add('show');
+      speaking = window.zumoIntroSpeak(() => setTimeout(exitIntro, 350));
+      if (speaking) return;
+    }
+    exitIntro();
+  });
 })();
 
 // ── end intro ─────────────────────────────────────────
