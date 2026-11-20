@@ -434,6 +434,32 @@
       if (skipEl) skipEl.textContent = 'click again to skip';
       return true;
     };
+    // when the bubble appears, try to say its line right away. Browsers allow this only
+    // where autoplay is permitted (e.g. sites the visitor often plays sound on); otherwise
+    // the play() is refused and the hint stays, so the first click plays it instead.
+    function tryAutoIntro() {
+      if (muted || !introMode || activated) return;
+      player.muted = false;
+      player.src = clipUrl('intro'); curId = 'intro';
+      const p = player.play();
+      if (!p || !p.then) return;
+      p.then(() => {
+        activated = true;                          // sound is allowed on this page
+        window.zumoIntroBusy = true;
+        const now = performance.now();
+        waveUntil = reduceMotion ? 0 : now + 2600;
+        moodName = 'happy'; moodUntil = now + 5200;
+        if (player.duration && isFinite(player.duration)) talkUntil = now + player.duration * 1000;
+        if (skipEl) skipEl.textContent = 'click to skip';
+        const fin = () => {
+          if (!window.zumoIntroBusy) return;
+          window.zumoIntroBusy = false;
+          if (window.zumoIntroEnded) window.zumoIntroEnded();
+        };
+        player.addEventListener('ended', fin, { once: true });
+        setTimeout(fin, 7000);
+      }).catch(() => {});
+    }
     const introBubble = document.getElementById('speech-bubble');
     if (introBubble) new MutationObserver((_, mo) => {
       if (!introBubble.classList.contains('show')) return;
@@ -442,6 +468,7 @@
       waveUntil = reduceMotion ? 0 : now + 2400;
       moodName = 'happy'; moodUntil = now + 3200;
       talkUntil = now + 1600;
+      tryAutoIntro();
     }).observe(introBubble, { attributes: true, attributeFilter: ['class'] });
   }
   function leaveIntro() {

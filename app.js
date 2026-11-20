@@ -104,12 +104,16 @@
 
   // Auto-exit after the full scene (waits while Zumo is talking)
   let speaking = false;
-  setTimeout(() => { if (!speaking) exitIntro(); }, 7500);
+  setTimeout(() => {
+    if (speaking) return;                                   // the click path exits when Zumo finishes
+    if (window.zumoIntroBusy) window.zumoIntroEnded = () => setTimeout(exitIntro, 350);
+    else exitIntro();
+  }, 7500);
 
   // First click: Zumo says the bubble's line (browsers need a click before any sound).
   // Click again (or no Zumo / muted): skip straight to the site.
   overlay.addEventListener('click', () => {
-    if (speaking || done) { exitIntro(); return; }
+    if (speaking || done || window.zumoIntroBusy) { exitIntro(); return; }
     if (window.zumoIntroSpeak) {
       astroWrap.classList.add('landed');
       bubble.classList.add('show');
