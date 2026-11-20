@@ -12,7 +12,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=202611202000" />
+  <link rel="stylesheet" href="style.css?v=202611202100" />
 </head>
 
 <body>
@@ -776,15 +776,15 @@
   </div><!-- end #site-wrapper -->
 
   <!-- 3D guide: pops up on each section and says its name (click her for voice) -->
-  <div id="guide" aria-hidden="true" title="Click to turn my voice on / off">
-    <div class="guide-bubble"><span class="guide-kicker">you're in</span><span id="guideText"></span></div>
+  <div id="guide" aria-live="polite" title="Zumo · click once for voice">
+    <div class="guide-bubble"><span class="guide-kicker" id="guideKicker">hello</span><span id="guideText"></span></div>
     <canvas id="guideCanvas"></canvas>
     <span class="guide-voice">voice <b class="on">on</b><b class="off">off</b></span>
   </div>
 
-  <script src="app.js?v=202611202000"></script>
+  <script src="app.js?v=202611202100"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="avatar.js?v=202611202000"></script>
+  <script src="avatar.js?v=202611202100"></script>
 </body>
 
 </html>

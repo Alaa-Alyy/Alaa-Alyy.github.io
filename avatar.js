@@ -1,22 +1,27 @@
-// ===== 3D GUIDE: a small AI robot =====
-// Pops up at the bottom-right each time a new section reaches the middle of the
-// screen, waves, makes a happy face and shows the section's name.
-// Click it to turn its voice on/off (off by default).
+// ===== ZUMO: the site's little AI guide robot =====
+// Greets visitors, pops up at the bottom-right with a line for each section,
+// comments on project cards, and has a few easter eggs (rapid clicks, idling,
+// switching to light mode). One click turns its voice on/off (off by default).
 (function () {
   const wrap = document.getElementById('guide');
   const bubbleText = document.getElementById('guideText');
   if (!wrap || typeof THREE === 'undefined') { if (wrap) wrap.remove(); return; }
 
-  const NAMES = {
-    about: 'About me',
-    stack: 'My stack',
-    experience: 'Experience',
-    projects: 'Projects',
-    education: 'Education',
-    competitions: 'Activities',
-    certs: 'Certificates',
-    contact: 'Say hi!',
+  // [small label, what Zumo says]
+  const LINES = {
+    about: ['about me', 'Meet my human.'],
+    stack: ['stack', 'Her everyday toolkit.'],
+    experience: ['experience', 'Where she leveled up.'],
+    projects: ['projects', 'My favorite part!'],
+    education: ['education', 'Still learning. Always.'],
+    competitions: ['activities', 'Hackathons & brain sweat.'],
+    certs: ['certificates', 'The receipts.'],
+    contact: ['contact', 'Go on, say hi. She replies!'],
   };
+  const PROJECT_LINES = [
+    [/elsewhere/i, 'This one found Mars on Earth!'],
+    [/roomly/i, '12 agents, one living room.'],
+  ];
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ---------- renderer / scene ----------
@@ -174,7 +179,7 @@
   orbit.add(links);
 
   // ---------- face drawing ----------
-  let mood = 'idle';          // idle | happy
+  let mood = 'idle';          // idle | happy | shy | squint | look
   let talkUntil = 0, blinkAt = performance.now() + 2500, lookX = 0, lookY = 0;
   function roundRect(x, y, w, h, r) {
     r = Math.min(r, w / 2, h / 2);
@@ -193,14 +198,20 @@
 
     fctx.shadowColor = '#5fe0a0'; fctx.shadowBlur = 14;
     fctx.fillStyle = '#7ff0b6'; fctx.strokeStyle = '#7ff0b6';
-    const ex = lookX * 10, ey = lookY * 6;
+    const ex = mood === 'look' ? Math.sin(now / 320) * 16 : lookX * 10, ey = lookY * 6;
     const blinking = now > blinkAt && now < blinkAt + 120;
     if (now > blinkAt + 120) blinkAt = now + 2200 + Math.random() * 2600;
     [-1, 1].forEach(s => {
       const cx = W / 2 + s * 52 + ex, cy = 70 + ey;
+      fctx.lineWidth = 9; fctx.lineCap = 'round'; fctx.lineJoin = 'round';
       if (mood === 'happy') {
-        fctx.lineWidth = 9; fctx.lineCap = 'round';
         fctx.beginPath(); fctx.arc(cx, cy + 8, 17, Math.PI * 1.15, Math.PI * 1.85); fctx.stroke();
+      } else if (mood === 'shy') {                     // > <
+        fctx.beginPath();
+        fctx.moveTo(cx + 12 * s, cy - 13); fctx.lineTo(cx - 10 * s, cy); fctx.lineTo(cx + 12 * s, cy + 13);
+        fctx.stroke();
+      } else if (mood === 'squint') {                  // eyes squeezed shut
+        fctx.beginPath(); fctx.arc(cx, cy - 10, 17, Math.PI * 0.2, Math.PI * 0.8); fctx.stroke();
       } else {
         const h = blinking ? 5 : 40;
         roundRect(cx - 14, cy - h / 2, 28, h, 13);
@@ -214,8 +225,9 @@
       fctx.beginPath(); fctx.arc(W / 2 + ex * 0.6, 100 + ey, 16, Math.PI * 0.2, Math.PI * 0.8); fctx.stroke();
     }
     fctx.shadowBlur = 0;                               // cheeks
-    fctx.fillStyle = 'rgba(224,138,166,0.35)';
-    [-1, 1].forEach(s => { fctx.beginPath(); fctx.ellipse(W / 2 + s * 86 + ex, 104 + ey, 13, 7, 0, 0, Math.PI * 2); fctx.fill(); });
+    const blush = mood === 'shy' ? 0.8 : 0.35, bw = mood === 'shy' ? 18 : 13;
+    fctx.fillStyle = 'rgba(224,138,166,' + blush + ')';
+    [-1, 1].forEach(s => { fctx.beginPath(); fctx.ellipse(W / 2 + s * 86 + ex, 104 + ey, bw, 7, 0, 0, Math.PI * 2); fctx.fill(); });
     faceTex.needsUpdate = true;
   }
 
@@ -246,38 +258,34 @@
   function speak(text) {
     if (!voiceOn || !window.speechSynthesis) return;
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace('!', ''));
+    const u = new SpeechSynthesisUtterance(text.replace(/[!…👀]/gu, ''));
     if (voice) u.voice = voice;
     u.pitch = 1.35; u.rate = 1.05; u.volume = 0.9;
     speechSynthesis.speak(u);
   }
-  wrap.addEventListener('click', () => {
-    voiceOn = !voiceOn;
-    wrap.classList.toggle('voice-on', voiceOn);
-    if (voiceOn) speak(bubbleText.textContent || 'Hi');
-    else if (window.speechSynthesis) speechSynthesis.cancel();
-    show(current || 'about', true);
-  });
 
   // ---------- show / hide ----------
+  const kickerEl = document.getElementById('guideKicker');
   let running = false, hideTimer = null, current = null;
-  let waveUntil = 0, happyUntil = 0, popAt = 0;
+  let waveUntil = 0, moodName = 'happy', moodUntil = 0, popAt = 0;
 
-  function show(id, keep) {
-    const name = NAMES[id];
-    if (!name) return;
-    bubbleText.textContent = name;
+  function say(kicker, line, opts = {}) {
+    if (document.body.classList.contains('intro-active')) return;
+    const { mood: m = 'happy', ms = 3600, wave = true, moodMs = 2200 } = opts;
+    if (kickerEl) kickerEl.textContent = kicker;
+    bubbleText.textContent = line;
     resize();
+    const wasShown = wrap.classList.contains('show');
     wrap.classList.add('show');
     const now = performance.now();
-    popAt = now;
-    waveUntil = reduceMotion ? 0 : now + 1900;
-    happyUntil = now + 2200;
-    talkUntil = now + 1000;
-    speak(name);
+    if (!wasShown) popAt = now;
+    waveUntil = wave && !reduceMotion ? now + 1900 : 0;
+    moodName = m; moodUntil = now + moodMs;
+    talkUntil = now + Math.min(1800, 300 + line.length * 45);
+    speak(line);
     start();
     clearTimeout(hideTimer);
-    hideTimer = setTimeout(hide, keep ? 4800 : 3600);
+    hideTimer = setTimeout(hide, ms);
   }
   function hide() {
     wrap.classList.remove('show');
@@ -296,6 +304,7 @@
     if (!running || document.hidden) { running = false; return; }
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     const t = now / 1000, calm = reduceMotion ? 0 : 1;
+    mood = now < moodUntil ? moodName : 'idle';
 
     // float + a small squash-and-stretch when it pops in
     const y = Math.sin(t * 2.1) * 0.06 * calm;
@@ -309,14 +318,19 @@
     // body and head follow the cursor smoothly
     lookX += (mx - lookX) * 0.08; lookY += (my - lookY) * 0.08;
     bot.rotation.y = -0.25 + lookX * 0.25;
-    head.rotation.y = lookX * 0.35;
-    head.rotation.x = lookY * 0.15;
-    head.rotation.z = Math.sin(t * 1.3) * 0.04 * calm + (now < happyUntil ? Math.sin(t * 5) * 0.06 * calm : 0);
+    head.rotation.y = mood === 'look' ? Math.sin(t * 3) * 0.35 : lookX * 0.35;
+    head.rotation.x = mood === 'shy' ? 0.18 : lookY * 0.15;
+    const wiggle = mood === 'happy' ? Math.sin(t * 5) * 0.06 : mood === 'shy' ? Math.sin(t * 9) * 0.05 : 0;
+    head.rotation.z = Math.sin(t * 1.3) * 0.04 * calm + wiggle * calm;
 
-    // arms: wave with the page-side arm, gentle sway otherwise
-    const wTarget = now < waveUntil ? -2.5 + Math.sin(t * 13) * 0.35 : -0.28 + Math.sin(t * 1.8) * 0.05 * calm;
+    // arms: wave with the page-side arm; hands up over the face when squinting
+    let wTarget = -0.28 + Math.sin(t * 1.8) * 0.05 * calm;
+    let oTarget = 0.28 - Math.sin(t * 1.8) * 0.05 * calm;
+    if (now < waveUntil) wTarget = -2.5 + Math.sin(t * 13) * 0.35;
+    if (mood === 'squint') { wTarget = -2.2; oTarget = 2.2; }
+    if (mood === 'shy') { wTarget = -0.6; oTarget = 0.6; }
     armWave.rotation.z += (wTarget - armWave.rotation.z) * Math.min(1, dt * 9);
-    armOther.rotation.z += (0.28 - Math.sin(t * 1.8) * 0.05 * calm - armOther.rotation.z) * Math.min(1, dt * 6);
+    armOther.rotation.z += (oTarget - armOther.rotation.z) * Math.min(1, dt * 9);
 
     // springy antenna: reacts to bobbing and head tilt
     const vel = (y - prevY) / Math.max(dt, 0.001); prevY = y;
@@ -336,12 +350,23 @@
     lp.setXYZ(3, nodes[0].position.x, nodes[0].position.y, nodes[0].position.z);
     lp.needsUpdate = true;
 
-    mood = now < happyUntil ? 'happy' : 'idle';
     drawFace(now);
     renderer.render(scene, camera);
     requestAnimationFrame(tick);
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && wrap.classList.contains('show')) start(); });
+
+  // ---------- greeting after the intro ----------
+  let greeted = false;
+  function greet() {
+    if (greeted) return;
+    greeted = true;
+    setTimeout(() => say('hello', "Hi! I'm Zumo, Alaa's AI guide", { ms: 4200 }), 900);
+  }
+  if (!document.body.classList.contains('intro-active')) greet();
+  else new MutationObserver((_, mo) => {
+    if (!document.body.classList.contains('intro-active')) { mo.disconnect(); greet(); }
+  }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
   // ---------- section watcher ----------
   let pending = null;
@@ -353,11 +378,71 @@
       clearTimeout(pending);
       pending = setTimeout(() => {
         current = id;
-        if (NAMES[id]) show(id); else hide();
+        const l = LINES[id];
+        if (l) say(l[0], l[1]);
+        else if (id !== 'hero') hide();
       }, 280);
     });
   }, { rootMargin: '-45% 0px -50% 0px' });
   document.querySelectorAll('section[id]').forEach(s => obs.observe(s));
+
+  // ---------- comments on project cards ----------
+  const lastCardTalk = new WeakMap();
+  document.querySelectorAll('.project-card').forEach(card => {
+    const title = (card.querySelector('h3') || {}).textContent || '';
+    const hit = PROJECT_LINES.find(([re]) => re.test(title));
+    if (!hit) return;
+    card.addEventListener('mouseenter', () => {
+      const now = performance.now();
+      if (now - (lastCardTalk.get(card) || -1e9) < 8000) return;
+      lastCardTalk.set(card, now);
+      say('psst', hit[1], { wave: false, ms: 3200 });
+    });
+  });
+
+  // ---------- clicks: one click = voice on/off, rapid clicks = tickles ----------
+  let clicks = [], clickTimer = null;
+  wrap.addEventListener('click', () => {
+    const now = performance.now();
+    clicks = clicks.filter(c => now - c < 1200); clicks.push(now);
+    clearTimeout(clickTimer);
+    if (clicks.length >= 3) {
+      clicks = [];
+      say('hey!', 'beep boop… okay, that tickles', { mood: 'shy', wave: false, moodMs: 2400, ms: 3600 });
+      return;
+    }
+    clickTimer = setTimeout(() => {
+      voiceOn = !voiceOn;
+      wrap.classList.toggle('voice-on', voiceOn);
+      if (!voiceOn && window.speechSynthesis) speechSynthesis.cancel();
+      if (voiceOn) say('voice on', 'I can talk now!', { wave: false, ms: 3000 });
+      else say('voice off', 'Okay, quiet mode.', { wave: false, ms: 2600 });
+    }, 320);
+  });
+
+  // ---------- idle for a minute: "still there?" ----------
+  let idleTimer = null, idleShown = false;
+  function bump() {
+    clearTimeout(idleTimer);
+    idleShown = false;
+    idleTimer = setTimeout(() => {
+      if (idleShown || document.hidden) return;
+      idleShown = true;
+      say('hmm…', 'still there? 👀', { mood: 'look', wave: false, moodMs: 3000, ms: 4200 });
+    }, 60000);
+  }
+  ['scroll', 'mousemove', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, bump, { passive: true }));
+  bump();
+
+  // ---------- light mode: "my eyes!" ----------
+  const themeBtn = document.getElementById('themeToggle');
+  if (themeBtn) themeBtn.addEventListener('click', () => {
+    setTimeout(() => {
+      const light = document.documentElement.getAttribute('data-theme') === 'light';
+      if (light) say('whoa', 'my eyes!', { mood: 'squint', wave: false, moodMs: 1400, ms: 2800 });
+      else say('ahh', 'much better.', { mood: 'happy', wave: false, moodMs: 1600, ms: 2600 });
+    }, 50);
+  });
 
   resize();
   drawFace(performance.now());

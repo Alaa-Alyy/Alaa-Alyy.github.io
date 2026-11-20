@@ -1195,3 +1195,8 @@ body{counter-reset:sec}
 #guideCanvas{width:190px;height:240px}
 .guide-bubble{right:150px;top:30px}
 @media(max-width:700px){#guide{width:130px}#guideCanvas{width:130px;height:164px}.guide-bubble{right:100px;top:14px}}
+
+/* Zumo's lines can be longer than a section name */
+.guide-bubble{white-space:normal;width:max-content;max-width:250px}
+#guideText{display:block}
+@media(max-width:700px){.guide-bubble{max-width:170px}#guideText{font-size:.98rem}}
