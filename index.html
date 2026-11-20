@@ -12,7 +12,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=202611202300" />
+  <link rel="stylesheet" href="style.css?v=202611210200" />
 </head>
 
 <body>
@@ -776,15 +776,18 @@
   </div><!-- end #site-wrapper -->
 
   <!-- 3D guide: pops up on each section and says its name (click her for voice) -->
-  <div id="guide" aria-live="polite" title="Zumo · click to mute or unmute">
+  <div id="guide" aria-live="polite" title="Zumo · click me to hear it again">
     <div class="guide-bubble"><span class="guide-kicker" id="guideKicker">hello</span><span id="guideText"></span></div>
     <canvas id="guideCanvas"></canvas>
-    <span class="guide-voice">voice <b class="on">on</b><b class="off">off</b></span>
+    <button type="button" id="guideMute" class="guide-mute" aria-pressed="false" aria-label="Mute Zumo" title="Mute Zumo">
+      <svg class="ic-on" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+      <svg class="ic-off" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+    </button>
   </div>
 
-  <script src="app.js?v=202611202300"></script>
+  <script src="app.js?v=202611210200"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="avatar.js?v=202611202300"></script>
+  <script src="avatar.js?v=202611210200"></script>
 </body>
 
 </html>

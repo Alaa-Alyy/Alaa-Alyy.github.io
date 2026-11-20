@@ -1205,3 +1205,17 @@ body{counter-reset:sec}
 .guide-bubble{white-space:normal;width:max-content;max-width:250px}
 #guideText{display:block}
 @media(max-width:700px){.guide-bubble{max-width:170px}#guideText{font-size:.98rem}}
+
+/* Zumo's mute button */
+.guide-mute{position:absolute;right:6px;bottom:10px;width:30px;height:30px;display:grid;place-items:center;
+  border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--pink2);cursor:none;
+  backdrop-filter:blur(6px);transition:color .2s,border-color .2s}
+.guide-mute:hover{border-color:var(--pink2)}
+.guide-mute .ic-off{display:none}
+#guide:not(.voice-on) .guide-mute{color:var(--wine2)}
+#guide:not(.voice-on) .guide-mute .ic-on{display:none}
+#guide:not(.voice-on) .guide-mute .ic-off{display:block}
+/* Zumo's bubble: no backdrop blur (costly on weak devices); a more solid surface instead */
+.guide-bubble{backdrop-filter:none!important;background:rgba(8,16,12,.94)!important}
+[data-theme="light"] .guide-bubble{background:rgba(255,255,255,.96)!important}
+.guide-mute{backdrop-filter:none!important}

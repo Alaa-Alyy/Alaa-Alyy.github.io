@@ -2,7 +2,7 @@
 // Greets visitors, pops up at the bottom-right with a line for each section,
 // comments on project cards, and has a few easter eggs (rapid clicks, idling,
 // switching to light mode). Its voice (pre-recorded clips in /voice) is on by
-// default and starts after the visitor's first click; one click on Zumo mutes it.
+// default and starts after the visitor's first click; the small speaker button mutes it.
 (function () {
   const wrap = document.getElementById('guide');
   const bubbleText = document.getElementById('guideText');
@@ -249,85 +249,75 @@
   });
 
   // ---------- voice: pre-recorded robot-boy clips in /voice ----------
-  // Sound is on by default, but browsers only allow audio after the visitor's
-  // first click/tap/key on the page, so clips wait for that first gesture.
-  const VOICE_V = '202611202200';
+  // One plain <audio> element plays every clip (reliable everywhere, unlocked once).
+  // Sound is on by default, but browsers only allow it after the visitor's first
+  // click/tap/key on the page. The mouth follows a precomputed loudness envelope.
+  const VOICE_V = '202611210200';
   const CLIP_IDS = ['greet', 'about', 'stack', 'experience', 'projects', 'education', 'competitions', 'certs',
     'contact', 'elsewhere', 'roomly', 'tickle', 'idle', 'eyes', 'better', 'mute', 'unmute'];
+  const MUTE_KEY = 'zumoMute2';
+  const clipUrl = id => 'voice/' + id + '.mp3?v=' + VOICE_V;
   let muted = false;
-  try { muted = localStorage.getItem('zumoMuted') === '1'; } catch (e) {}
+  try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) {}
   let activated = !!(navigator.userActivation && navigator.userActivation.hasBeenActive);
-  let actx = null, analyser = null, levelBuf = null, curAudio = null;
-  let pendingClip = null, pendingAt = 0, mouthLevel = -1;
-  const clips = {};
+  let curId = null, pendingClip = null, pendingAt = 0, mouthLevel = -1, envs = {}, unlocked = false, warmed = false;
+  const player = new Audio();
+  player.preload = 'auto';
+  fetch('voice/env.json?v=' + VOICE_V).then(r => r.ok ? r.json() : {}).then(j => { envs = j || {}; }).catch(() => {});
 
-  function getClip(id) {
-    if (!clips[id]) {
-      const a = new Audio('voice/' + id + '.mp3?v=' + VOICE_V);
-      a.preload = 'auto';
-      clips[id] = a;
-      hook(a);
-    }
-    return clips[id];
-  }
-  function hook(a) {
-    if (!actx || a.__hooked) return;
-    try { actx.createMediaElementSource(a).connect(analyser); a.__hooked = true; } catch (e) {}
-  }
-  function ensureAudio() {
-    if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) return;
-    try {
-      actx = new AC();
-      analyser = actx.createAnalyser();
-      analyser.fftSize = 512;
-      levelBuf = new Uint8Array(analyser.fftSize);
-      analyser.connect(actx.destination);
-      Object.values(clips).forEach(hook);
-    } catch (e) { actx = null; analyser = null; }
-  }
   function playClip(id) {
-    if (!id) return;
-    if (muted) return;
+    if (!id || muted) return;
     if (!activated) { pendingClip = id; pendingAt = performance.now(); return; }
-    if (curAudio) { curAudio.pause(); }
-    const a = getClip(id);
-    try { a.currentTime = 0; } catch (e) {}
-    const p = a.play();
+    player.muted = false;
+    if (curId !== id || !player.src) player.src = clipUrl(id);
+    try { player.currentTime = 0; } catch (e) {}
+    const p = player.play();
     if (p && p.catch) p.catch(() => {});
-    curAudio = a;
-    const setTalk = () => { if (a.duration && isFinite(a.duration)) talkUntil = performance.now() + a.duration * 1000; };
-    if (a.readyState >= 1) setTalk(); else a.addEventListener('loadedmetadata', setTalk, { once: true });
+    curId = id;
+    const setTalk = () => { if (player.duration && isFinite(player.duration)) talkUntil = performance.now() + player.duration * 1000; };
+    if (player.readyState >= 1) setTalk(); else player.addEventListener('loadedmetadata', setTalk, { once: true });
   }
-  function onFirstGesture() {
-    if (activated && actx) return;
+  function onGesture() {
     activated = true;
-    ensureAudio();
-    CLIP_IDS.forEach(getClip);       // small files (~220 KB in total): warm them up
-    if (pendingClip && wrap.classList.contains('show') && performance.now() - pendingAt < 4000) playClip(pendingClip);
+    const wantNow = pendingClip && wrap.classList.contains('show') && performance.now() - pendingAt < 4500;
+    if (!unlocked) {
+      unlocked = true;
+      if (!wantNow && !muted) {
+        // start the element once inside this gesture (needed on iOS), silently
+        player.muted = true;
+        player.src = clipUrl('about'); curId = 'about';
+        const p = player.play();
+        if (p && p.then) p.then(() => { if (player.muted) { player.pause(); player.muted = false; } })
+          .catch(() => { player.muted = false; });
+      }
+    }
+    if (wantNow) playClip(pendingClip);
     pendingClip = null;
+    if (!warmed) {                     // fetch the other clips into the cache (~220 KB total)
+      warmed = true;
+      setTimeout(() => CLIP_IDS.forEach(id => fetch(clipUrl(id)).catch(() => {})), 1200);
+    }
   }
-  ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, onFirstGesture, { capture: true, passive: true }));
-  if (activated) { ensureAudio(); }
+  ['pointerdown', 'pointerup', 'click', 'keydown', 'touchend'].forEach(ev =>
+    window.addEventListener(ev, onGesture, { capture: true, passive: true }));
 
   function readMouth() {
-    if (!analyser || !curAudio || curAudio.paused || curAudio.ended) { mouthLevel = -1; return; }
-    analyser.getByteTimeDomainData(levelBuf);
-    let sum = 0;
-    for (let i = 0; i < levelBuf.length; i++) { const v = (levelBuf[i] - 128) / 128; sum += v * v; }
-    const rms = Math.sqrt(sum / levelBuf.length);
-    mouthLevel = Math.min(1, rms * 7);
+    if (player.paused || player.ended || player.muted) { mouthLevel = -1; return; }
+    const env = envs[curId];
+    if (!env) { mouthLevel = -1; return; }
+    const i = Math.min(env.length - 1, Math.floor(player.currentTime * 30));
+    mouthLevel = env[i] || 0;
   }
 
   // ---------- show / hide ----------
   const kickerEl = document.getElementById('guideKicker');
-  let running = false, hideTimer = null, current = null;
+  let running = false, hideTimer = null, current = null, lastLine = null;
   let waveUntil = 0, moodName = 'happy', moodUntil = 0, popAt = 0;
 
   function say(kicker, line, opts = {}) {
     if (document.body.classList.contains('intro-active')) return;
     const { mood: m = 'happy', ms = 3600, wave = true, moodMs = 2200, clip = null } = opts;
+    if (clip && clip !== 'tickle' && clip !== 'mute' && clip !== 'unmute') lastLine = [kicker, line, opts];
     if (kickerEl) kickerEl.textContent = kicker;
     bubbleText.textContent = line;
     resize();
@@ -439,7 +429,7 @@
   function leaveIntro() {
     if (!introMode) return;
     introMode = false;
-    wrap.insertBefore(canvas, wrap.querySelector('.guide-voice'));
+    wrap.insertBefore(canvas, wrap.querySelector('#guideMute'));
     waveUntil = 0; moodUntil = 0;
     resize();
     if (!wrap.classList.contains('show')) running = false;
@@ -489,10 +479,33 @@
     });
   });
 
-  // ---------- clicks: one click = mute/unmute, rapid clicks = tickles ----------
-  wrap.classList.toggle('voice-on', !muted);
+  // ---------- clicks: Zumo = say it again (3 fast clicks = tickles); speaker button = mute ----------
+  const muteBtn = document.getElementById('guideMute');
+  function syncMuteBtn() {
+    wrap.classList.toggle('voice-on', !muted);
+    if (muteBtn) {
+      muteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+      muteBtn.setAttribute('aria-label', muted ? 'Unmute Zumo' : 'Mute Zumo');
+      muteBtn.title = muted ? 'Unmute Zumo' : 'Mute Zumo';
+    }
+  }
+  syncMuteBtn();
+  if (muteBtn) muteBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (!muted) {
+      say('voice off', 'Okay, quiet mode.', { wave: false, ms: 2600, clip: 'mute' });
+      muted = true;
+    } else {
+      muted = false;
+      say('voice on', "I'm back!", { wave: false, ms: 2600, clip: 'unmute' });
+    }
+    try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (err) {}
+    syncMuteBtn();
+  });
+
   let clicks = [], clickTimer = null;
-  wrap.addEventListener('click', () => {
+  canvas.addEventListener('click', () => {
+    if (introMode) return;
     const now = performance.now();
     clicks = clicks.filter(c => now - c < 1200); clicks.push(now);
     clearTimeout(clickTimer);
@@ -502,15 +515,7 @@
       return;
     }
     clickTimer = setTimeout(() => {
-      if (!muted) {
-        say('voice off', 'Okay, quiet mode.', { wave: false, ms: 2600, clip: 'mute' });
-        muted = true;
-      } else {
-        muted = false;
-        say('voice on', "I'm back!", { wave: false, ms: 2600, clip: 'unmute' });
-      }
-      wrap.classList.toggle('voice-on', !muted);
-      try { localStorage.setItem('zumoMuted', muted ? '1' : '0'); } catch (e) {}
+      if (lastLine) say(lastLine[0], lastLine[1], Object.assign({}, lastLine[2], { wave: true }));
     }, 320);
   });
 
