@@ -12,7 +12,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=202611200019" />
+  <link rel="stylesheet" href="style.css?v=202611201900" />
 </head>
 
 <body>
@@ -771,20 +771,22 @@
     <footer class="footer">
       <p>designed & coded by <strong>Alaa Ali</strong> · Cairo, 2026</p>
       <p class="footer-sub">ai engineer · agents · computer vision</p>
+      <p class="footer-credit">3D guide made with MakeHuman / MPFB (CC0 assets) · trousers by Elvaerwyn and sweater by Mindfront, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY</a>, from the MakeHuman asset repository</p>
     </footer>
 
   </div><!-- end #site-wrapper -->
 
   <!-- 3D guide: pops up on each section and says its name (click her for voice) -->
-  <div id="guide" aria-hidden="true" title="Click to turn my voice on / off">
+  <div id="guide" data-model="guide.glb?v=202611201900" aria-hidden="true" title="Click to turn my voice on / off">
     <div class="guide-bubble"><span class="guide-kicker">you're in</span><span id="guideText"></span></div>
     <canvas id="guideCanvas"></canvas>
     <span class="guide-voice">voice <b class="on">on</b><b class="off">off</b></span>
   </div>
 
-  <script src="app.js?v=202611200019"></script>
+  <script src="app.js?v=202611201900"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="avatar.js?v=202611200019"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="avatar.js?v=202611201900"></script>
 </body>
 
 </html>
